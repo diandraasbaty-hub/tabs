@@ -30,5 +30,10 @@ const art = [
 ].join("\n");
 fs.writeFileSync(path.join(root, "dist", "artifact.html"), art);
 
+/* GitHub Pages serves from /docs */
+fs.mkdirSync(path.join(root, "docs"), { recursive: true });
+fs.writeFileSync(path.join(root, "docs", "index.html"), html);
+
 console.log("dist/tabs.html", (html.length / 1024).toFixed(1) + "kb");
 console.log("dist/artifact.html", (art.length / 1024).toFixed(1) + "kb");
+console.log("docs/index.html");
