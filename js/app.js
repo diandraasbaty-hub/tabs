@@ -215,10 +215,31 @@ $("d-again").onclick = () => {
   show("s-hello");
 };
 
-$("d-send").onclick = async () => {
+function remember() {
   pushHistory(store, { date: DATE, theme: state.theme, wild: WILD, tabs: state.tabs });
-  const ok = await shareCard($("cv"), DATE);
-  if (!ok) toast("Press and hold the card → Save or Copy");
+}
+
+$("d-send").onclick = async () => {
+  remember();
+  if (await shareCard($("cv"), DATE)) return;
+  if (await copyCard($("cv"))) {
+    toast("Copied. Open Messages and paste it.");
+    $("d-hint").textContent = "Card is on your clipboard — paste it into any text.";
+    return;
+  }
+  toast("Press and hold the card → Copy");
+  $("d-hint").textContent =
+    "Sharing is blocked here. Press and hold the card above, choose Copy, then paste it into Messages.";
+};
+
+$("d-copy").onclick = async () => {
+  remember();
+  if (await copyCard($("cv"))) {
+    toast("Copied. Open Messages and paste it.");
+    $("d-hint").textContent = "Card is on your clipboard — paste it into any text.";
+  } else {
+    toast("Press and hold the card → Copy");
+  }
 };
 
 /* ---------- boot ---------- */

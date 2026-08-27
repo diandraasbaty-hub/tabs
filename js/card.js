@@ -238,6 +238,24 @@ function canvasToBlob(canvas) {
 /* The share sheet is the happy path, but it is blocked in embedded viewers
    and missing on desktop. The caller always shows the press-and-hold image
    too, so a false return here is not a failure. */
+/* Safari wants the ClipboardItem built inside the user gesture, so the blob
+   is handed over as a promise rather than awaited first. */
+async function copyCard(canvas) {
+  if (!navigator.clipboard || !window.ClipboardItem) return false;
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": canvasToBlob(canvas) })
+    ]);
+    return true;
+  } catch (e) {
+    try {
+      const blob = await canvasToBlob(canvas);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      return true;
+    } catch (e2) { return false; }
+  }
+}
+
 async function shareCard(canvas, dateKey) {
   const blob = await canvasToBlob(canvas);
   if (!blob) return false;
