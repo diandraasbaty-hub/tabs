@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#c9b8ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>TABS — keep tabs on your people</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* TABS — everything bounces. */
+
+:root{
+  --ink:#3a1f4d; --surface:#fffaff;
+  --t1:#ff8fc7; --t2:#a98bff; --t3:#5fc9f8;
+  --bg1:#ffd3e8; --bg2:#c9b8ff; --bg3:#a6e3ff;
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --pad:20px;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:'Nunito',ui-rounded,-apple-system,system-ui,sans-serif;
+  font-weight:700;
+  color:var(--ink);
+  background:linear-gradient(150deg,var(--bg1),var(--bg2) 55%,var(--bg3));
+  background-attachment:fixed;
+  transition:background .6s ease;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before,body::after{
+  content:"";position:fixed;border-radius:50%;filter:blur(60px);
+  opacity:.55;pointer-events:none;z-index:0;
+}
+body::before{width:60vw;height:60vw;background:var(--t1);top:-18vw;left:-14vw;
+  animation:drift 18s ease-in-out infinite alternate}
+body::after{width:55vw;height:55vw;background:var(--t3);bottom:-16vw;right:-12vw;
+  animation:drift 22s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate3d(6vw,4vw,0) scale(1.15)}}
+
+.app{
+  position:relative;z-index:1;
+  min-height:100dvh;max-width:520px;margin:0 auto;
+  padding:var(--pad) var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;
+}
+
+.screen{display:none;flex:1;flex-direction:column}
+.screen.on{display:flex;animation:pop .45s var(--spring) both}
+@keyframes pop{from{opacity:0;transform:translateY(22px) scale(.96)}}
+
+/* ---------- type ---------- */
+h1,h2,p{margin:0}
+.eyebrow{
+  font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  opacity:.55
+}
+.big{font-size:clamp(28px,8vw,38px);font-weight:800;line-height:1.08;letter-spacing:-.02em}
+.sub{font-size:16px;font-weight:700;opacity:.62;margin-top:10px;line-height:1.4}
+
+/* ---------- hello ---------- */
+#s-hello{justify-content:center;align-items:center;text-align:center;gap:6px}
+.wordmark{
+  font-size:clamp(56px,18vw,86px);font-weight:800;letter-spacing:-.05em;
+  line-height:1;margin-top:6px
+}
+.tagline{font-size:16px;font-weight:800;opacity:.6;letter-spacing:.01em}
+
+.stack{position:relative;height:150px;width:100%;max-width:340px;margin-bottom:6px}
+.stack i{
+  position:absolute;left:50%;bottom:0;display:block;
+  width:180px;height:120px;border-radius:26px 26px 34px 34px;
+  transform-origin:50% 100%;
+  box-shadow:0 12px 26px rgba(60,30,90,.18);
+  animation:bob 3.4s ease-in-out infinite;
+}
+.stack i:nth-child(1){background:var(--t1);margin-left:-140px;transform:rotate(-9deg)}
+.stack i:nth-child(2){background:var(--t2);margin-left:-90px;height:140px;animation-delay:.25s}
+.stack i:nth-child(3){background:var(--t3);margin-left:-40px;transform:rotate(9deg);animation-delay:.5s}
+.stack i::after{
+  content:"";position:absolute;top:16px;left:18px;right:18px;height:12px;
+  border-radius:6px;background:rgba(255,255,255,.55)
+}
+@keyframes bob{50%{transform:translateY(-12px) rotate(var(--r,0deg))}}
+.stack i:nth-child(1){--r:-9deg}
+.stack i:nth-child(3){--r:9deg}
+
+/* ---------- compose ---------- */
+.topbar{display:flex;align-items:center;gap:12px;min-height:44px;margin-bottom:14px}
+.back{
+  border:0;background:rgba(255,255,255,.6);color:var(--ink);
+  width:44px;height:44px;border-radius:50%;font-size:20px;font-weight:800;
+  cursor:pointer;transition:transform .25s var(--spring)
+}
+.back:active{transform:scale(.88)}
+.dots{display:flex;gap:7px;margin-left:auto}
+.dots b{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.65);
+  transition:all .35s var(--spring)}
+.dots b.on{width:26px;border-radius:5px;background:var(--ink);opacity:.75}
+
+.tabcard{
+  background:var(--surface);border-radius:34px;padding:24px 22px 18px;
+  box-shadow:0 18px 40px rgba(60,30,90,.16);
+  position:relative;margin-top:34px;
+  animation:pop .5s var(--spring) both;
+}
+.tabcard::before{
+  content:"";position:absolute;top:-40px;left:26px;width:136px;height:42px;
+  border-radius:22px 22px 0 0;background:var(--tabcolor,var(--t1));
+  box-shadow:0 -6px 16px rgba(60,30,90,.12)
+}
+.tabcard::after{
+  content:"";position:absolute;top:-28px;left:44px;width:100px;height:11px;
+  border-radius:5px;background:rgba(255,255,255,.6)
+}
+.slotlabel{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--tabcolor,var(--t1))}
+.wildq{
+  font-size:21px;font-weight:800;line-height:1.25;margin-top:6px;
+  letter-spacing:-.01em
+}
+.wildq::before{content:"⭐ "}
+
+.field{
+  width:100%;border:0;outline:0;background:transparent;resize:none;
+  font-family:inherit;font-weight:700;color:var(--ink);
+  font-size:24px;line-height:1.32;margin-top:10px;min-height:104px;
+}
+.field::placeholder{color:var(--ink);opacity:.28}
+.count{font-size:12px;font-weight:800;opacity:.35;text-align:right}
+
+.moodrow{display:flex;gap:8px;margin-top:14px;justify-content:space-between}
+.moodrow button{
+  flex:1;min-width:0;border:0;background:rgba(0,0,0,.05);border-radius:18px;
+  padding:10px 0;font-size:24px;line-height:1;cursor:pointer;
+  transition:transform .3s var(--spring),background .2s
+}
+.moodrow button.on{background:var(--tabcolor,var(--t1));transform:scale(1.14)}
+.moodrow button:active{transform:scale(.9)}
+
+/* ---------- buttons ---------- */
+#s-hello .actions{margin-top:32px}
+#s-compose .tabcard{margin-top:30px}
+.actions{margin-top:auto;padding-top:22px;display:flex;flex-direction:column;gap:10px}
+.btn{
+  border:0;cursor:pointer;font-family:inherit;font-weight:800;
+  font-size:19px;letter-spacing:.02em;
+  padding:19px 26px;border-radius:999px;
+  background:var(--ink);color:#fff;
+  box-shadow:0 12px 26px rgba(60,30,90,.28);
+  transition:transform .3s var(--spring),box-shadow .3s
+}
+.btn:active{transform:scale(.94);box-shadow:0 6px 14px rgba(60,30,90,.24)}
+.btn:disabled{opacity:.35;box-shadow:none}
+.btn.ghost{background:rgba(255,255,255,.65);color:var(--ink);box-shadow:none}
+.btn.big-cta{font-size:21px;padding:22px 26px}
+.linkish{
+  background:none;border:0;font-family:inherit;font-weight:800;font-size:15px;
+  color:var(--ink);opacity:.55;cursor:pointer;padding:10px
+}
+
+/* ---------- face ---------- */
+#s-face{text-align:center}
+.blobwrap{
+  margin:26px auto 0;width:min(66vw,260px);aspect-ratio:1;position:relative;
+  animation:bob2 4s ease-in-out infinite
+}
+@keyframes bob2{50%{transform:translateY(-10px) rotate(-2deg)}}
+.blob{
+  width:100%;height:100%;overflow:hidden;background:rgba(255,255,255,.55);
+  border-radius:52% 48% 45% 55%/50% 55% 45% 50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 18px 40px rgba(60,30,90,.2);font-size:56px
+}
+.blob img{width:100%;height:100%;object-fit:cover;display:block}
+input[type=file]{display:none}
+
+/* ---------- card ---------- */
+#s-card{text-align:center}
+.cardshell{
+  margin:16px auto 0;width:100%;border-radius:26px;overflow:hidden;
+  box-shadow:0 22px 50px rgba(60,30,90,.28);
+  animation:pop .55s var(--spring) both;background:rgba(255,255,255,.4)
+}
+.cardshell img{width:100%;display:block}
+.swatches{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.swatch{
+  width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.8);
+  cursor:pointer;padding:0;transition:transform .3s var(--spring)
+}
+.swatch.on{transform:scale(1.22);border-color:var(--ink)}
+.hint{font-size:13px;font-weight:800;opacity:.5;margin-top:14px;line-height:1.45}
+
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);
+  background:var(--ink);color:#fff;padding:14px 22px;border-radius:999px;
+  font-weight:800;font-size:15px;z-index:9;transition:transform .45s var(--spring);
+  max-width:90vw;text-align:center
+}
+.toast.on{transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 1 ------------------------------------------------------------- -->
+  <section class="screen on" id="s-hello">
+    <div class="stack"><i></i><i></i><i></i></div>
+    <div class="wordmark">TABS</div>
+    <div class="tagline">keep tabs on your people</div>
+    <p class="sub">Three things open in your head.<br>Send them to someone.</p>
+    <div class="actions" style="width:100%">
+      <button class="btn big-cta" id="start">What's open?</button>
+      <button class="linkish" id="seehistory" hidden>your last tabs</button>
+    </div>
+  </section>
+
+  <!-- 2 ------------------------------------------------------------- -->
+  <section class="screen" id="s-compose">
+    <div class="topbar">
+      <button class="back" id="c-back" aria-label="Back">←</button>
+      <span class="eyebrow" id="c-step">Tab 1 of 3</span>
+      <div class="dots" id="c-dots"><b class="on"></b><b></b><b></b></div>
+    </div>
+    <div class="tabcard" id="c-card">
+      <div class="slotlabel" id="c-label">A RANDOM THOUGHT</div>
+      <div class="wildq" id="c-wild" hidden></div>
+      <textarea class="field" id="c-field" maxlength="90" rows="3"
+                autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
+      <div class="count"><span id="c-count">0</span>/90</div>
+      <div class="moodrow" id="c-moods"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="c-next">Next tab</button>
+    </div>
+  </section>
+
+  <!-- 3 ------------------------------------------------------------- -->
+  <section class="screen" id="s-face">
+    <div class="topbar">
+      <button class="back" id="f-back" aria-label="Back">←</button>
+      <span class="eyebrow">Almost there</span>
+    </div>
+    <h2 class="big">Add a face?</h2>
+    <p class="sub">Totally optional. It just makes it feel like you.</p>
+    <div class="blobwrap"><div class="blob" id="f-blob">🫧</div></div>
+    <input type="file" id="f-input" accept="image/*">
+    <div class="actions">
+      <button class="btn" id="f-pick">Add a photo</button>
+      <button class="btn ghost" id="f-skip">Skip it</button>
+    </div>
+  </section>
+
+  <!-- 4 ------------------------------------------------------------- -->
+  <section class="screen" id="s-card">
+    <div class="topbar">
+      <button class="back" id="d-back" aria-label="Back">←</button>
+      <span class="eyebrow">Your tabs</span>
+    </div>
+    <div class="cardshell"><img id="d-img" alt="Your TABS card"></div>
+    <div class="swatches" id="d-swatches"></div>
+    <div class="actions">
+      <button class="btn big-cta" id="d-send">Send tabs</button>
+      <button class="linkish" id="d-again">start over</button>
+    </div>
+    <p class="hint" id="d-hint">Press and hold the card to save or copy it.</p>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<canvas id="cv" hidden></canvas>
+
+<script>
+/* TABS — prompt banks.
+   WILDCARDS is the third tab. One per day, same for everyone, chosen from
+   the date so it can't drift between devices. Keep them short enough to
+   answer in one line and mix the silly with the real. US English only. */
+
+const WILDCARDS = [
+  "one thing I need",
+  "something I'm avoiding",
+  "a small win",
+  "the last thing that made me laugh",
+  "an unpopular opinion",
+  "something I'd do if nobody was watching",
+  "what I'd spend $40 on right now",
+  "a thing I'm weirdly proud of",
+  "what I keep re-reading",
+  "something I'm dreading",
+  "the pettiest thing bothering me",
+  "who I owe a text",
+  "the best thing I ate this week",
+  "a song stuck in my head",
+  "something I want to quit",
+  "what I'd do with a free Tuesday",
+  "a compliment I got and didn't believe",
+  "the tab I refuse to close",
+  "something I'm pretending is fine",
+  "what I'd tell 16-year-old me",
+  "a thing I want to be talked into",
+  "the last photo I took",
+  "something I've been putting off for a month",
+  "who I'd call if it all went sideways",
+  "an opinion I've changed",
+  "what I want more of",
+  "the dumbest thing I googled today",
+  "a place I want to be right now",
+  "something I'm secretly excited about",
+  "the hardest part of today",
+  "what nobody knows I'm working on",
+  "a thing I need permission to stop doing",
+  "the best advice I ignored",
+  "something I'd buy twice",
+  "who deserves a thank you",
+  "a habit I'm trying to build",
+  "the thing I keep rehearsing in my head",
+  "what would make tomorrow easier",
+  "something that surprised me",
+  "the last time I felt proud",
+  "a fear I'd like to retire",
+  "what I'm reading, watching, or scrolling",
+  "something I want to say out loud",
+  "the smallest thing that made today better",
+  "a promise I made myself",
+  "what I'd do with one extra hour",
+  "someone I miss",
+  "the thing I'd fix with a magic wand",
+  "what I'm rooting for",
+  "a rule I'm breaking this week",
+  "something I'm curious about",
+  "the last kind thing someone did",
+  "what's taking up the most space in my head",
+  "a thing I want to start on Monday",
+  "something I'm ready to let go of",
+  "what I'd want in my hotel room tonight",
+  "the part of today I'd repeat",
+  "an excuse I'm tired of using",
+  "who I want to be more like",
+  "something worth celebrating",
+  "the last time I laughed until I cried",
+  "a question I can't stop asking"
+];
+
+/* Rotating placeholder examples so the empty field never feels blank. */
+const EXAMPLES = {
+  thought: [
+    "why do hotel showers have seventeen settings",
+    "I think about that one email from 2019 daily",
+    "grocery stores should have a nap aisle",
+    "nobody knows what a shallot actually is",
+    "the ocean is a soup and we swim in it"
+  ],
+  doing: [
+    "three calls and a thing I forgot to book",
+    "laundry, allegedly",
+    "pretending to answer emails",
+    "driving somewhere I don't want to go",
+    "one more meeting and then I'm free"
+  ],
+  wild: [
+    "someone to tell me the deck looks fine",
+    "a nap and zero notifications",
+    "an honest answer, not a nice one"
+  ]
+};
+
+const MOODS = ["\u{1F4AD}", "\u{1F62E}‍\u{1F4A8}", "\u{1F979}", "\u{1F929}", "\u{1FAE0}", "\u{1F602}"];
+
+</script>
+<script>
+/* TABS — themes, dates, and everything that touches localStorage. */
+
+const THEMES = [
+  { id: "bubblegum", name: "Bubblegum",
+    bg: ["#ffd3e8", "#c9b8ff", "#a6e3ff"],
+    tabs: ["#ff8fc7", "#a98bff", "#5fc9f8"],
+    ink: "#3a1f4d", surface: "#fffaff" },
+  { id: "sherbet", name: "Sherbet",
+    bg: ["#ffe1b8", "#ffb3a0", "#ff9fc4"],
+    tabs: ["#ffb03b", "#ff7a66", "#ff77ab"],
+    ink: "#4d2418", surface: "#fffdf7" },
+  { id: "pool", name: "Pool",
+    bg: ["#bff3ff", "#8fd0ff", "#a9b4ff"],
+    tabs: ["#3ec9e0", "#4a9df7", "#7f86ff"],
+    ink: "#12324d", surface: "#fbfeff" },
+  { id: "limeade", name: "Limeade",
+    bg: ["#e4ffb8", "#a8f0c6", "#7fe3e0"],
+    tabs: ["#9fdc3c", "#41cf95", "#2fc4c4"],
+    ink: "#1d3d24", surface: "#fcfff7" },
+  { id: "grape", name: "Grape",
+    bg: ["#e0c9ff", "#b7a6ff", "#8fb6ff"],
+    tabs: ["#b072ff", "#7d78ff", "#5a9bff"],
+    ink: "#2e1a52", surface: "#fdfbff" },
+  { id: "sunbeam", name: "Sunbeam",
+    bg: ["#fff2a8", "#ffd08a", "#ffab7d"],
+    tabs: ["#ffd23c", "#ffa53c", "#ff8360"],
+    ink: "#4a3410", surface: "#fffdf3" }
+];
+
+const themeById = id => THEMES.find(t => t.id === id) || THEMES[0];
+
+/* --- dates --------------------------------------------------------- */
+
+function todayKey(d) {
+  const t = d || new Date();
+  const p = n => String(n).padStart(2, "0");
+  return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())}`;
+}
+
+function prettyDate(key) {
+  const [y, m, d] = key.split("-").map(Number);
+  const months = ["JAN","FEB","MAR","APR","MAY","JUN",
+                  "JUL","AUG","SEP","OCT","NOV","DEC"];
+  return `${months[m - 1]} ${d}`;
+}
+
+/* Everyone gets the same wildcard on the same calendar day. Seeded by the
+   date string alone so it never depends on device, timezone offset math,
+   or how many times the app has been opened. */
+function wildcardFor(key) {
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return WILDCARDS[Math.abs(h) % WILDCARDS.length];
+}
+
+function pickExample(bank, key) {
+  let h = 5381;
+  for (let i = 0; i < key.length; i++) h = ((h << 5) + h + key.charCodeAt(i)) | 0;
+  return bank[Math.abs(h) % bank.length];
+}
+
+/* --- storage ------------------------------------------------------- */
+
+const STORE_KEY = "tabs-v1";
+
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return { draft: null, history: [], theme: null };
+    const parsed = JSON.parse(raw);
+    return {
+      draft: parsed.draft || null,
+      history: Array.isArray(parsed.history) ? parsed.history : [],
+      theme: parsed.theme || null
+    };
+  } catch (e) {
+    return { draft: null, history: [], theme: null };
+  }
+}
+
+function saveStore(store) {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      draft: store.draft,
+      history: store.history.slice(0, 7),
+      theme: store.theme
+    }));
+  } catch (e) { /* private mode, full disk — the app still works */ }
+}
+
+/* History never keeps the photo. A week of data URLs blows the quota. */
+function pushHistory(store, entry) {
+  const rest = store.history.filter(h => h.date !== entry.date);
+  store.history = [{
+    date: entry.date,
+    theme: entry.theme,
+    wild: entry.wild,
+    tabs: entry.tabs.map(t => ({ text: t.text, mood: t.mood }))
+  }].concat(rest).slice(0, 7);
+  saveStore(store);
+}
+
+</script>
+<script>
+/* TABS — the card renderer.
+   Everything a friend sees is drawn here. 1080x1350 so it lands big in a
+   text thread without being cropped. */
+
+const CARD_W = 1080, CARD_H = 1350;
+const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
+const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
+
+const font = (weight, size) => `${weight} ${size}px ${FONT}`;
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* A soft organic blob rather than a circle — the photo should look dropped
+   in by hand, not cropped by a computer. */
+function blobPath(ctx, cx, cy, r) {
+  const k = 0.5523 * r;
+  const j = (n) => r * n;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - j(1.04));
+  ctx.bezierCurveTo(cx + k * 1.12, cy - j(1.02), cx + j(1.06), cy - k * 0.92, cx + j(1.0), cy);
+  ctx.bezierCurveTo(cx + j(0.96), cy + k * 1.1, cx + k * 0.94, cy + j(1.05), cx, cy + j(0.99));
+  ctx.bezierCurveTo(cx - k * 1.08, cy + j(0.96), cx - j(1.03), cy + k * 0.96, cx - j(0.99), cy);
+  ctx.bezierCurveTo(cx - j(0.96), cy - k * 1.06, cx - k * 0.98, cy - j(1.02), cx, cy - j(1.04));
+  ctx.closePath();
+}
+
+function wrap(ctx, text, maxWidth, maxLines) {
+  const words = String(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  for (const w of words) {
+    const test = line ? line + " " + w : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+      if (lines.length === maxLines) break;
+    } else {
+      line = test;
+    }
+  }
+  if (lines.length < maxLines && line) lines.push(line);
+  if (lines.length === maxLines) {
+    let last = lines[maxLines - 1];
+    const used = words.join(" ");
+    if (lines.join(" ").length < used.length) {
+      while (last.length > 4 && ctx.measureText(last + "…").width > maxWidth) {
+        last = last.slice(0, -1);
+      }
+      lines[maxLines - 1] = last.replace(/[\s,.]+$/, "") + "…";
+    }
+  }
+  return lines;
+}
+
+/* data = { tabs:[{text,mood}], wild, photo, theme, date } */
+function drawCard(canvas, data) {
+  const t = themeById(data.theme);
+  const ctx = canvas.getContext("2d");
+  canvas.width = CARD_W;
+  canvas.height = CARD_H;
+  ctx.clearRect(0, 0, CARD_W, CARD_H);
+  ctx.textBaseline = "alphabetic";
+
+  const WX = 74, WW = CARD_W - 148, WR = 54, PAD = 62;
+  const GUT = 96;                    /* emoji column */
+  const textW = WW - PAD * 2 - GUT;
+
+  /* ---- measure before drawing so the window fits its contents ---- */
+  let size = 48, blocks;
+  for (;;) {
+    ctx.font = font(700, size);
+    blocks = data.tabs.map((tab, i) => {
+      const lines = wrap(ctx, tab.text || "—", textW, 3);
+      return { lines, h: 42 + lines.length * (size * 1.26) + 46 };
+    });
+    if (blocks.reduce((s, b) => s + b.h, 0) <= 660 || size <= 32) break;
+    size -= 4;
+  }
+  blocks.forEach((b, i) => {
+    b.label = i === 2 ? "NEW TAB · " + String(data.wild || "").toUpperCase()
+                      : LABELS[i];
+    b.labelSize = 26;
+    ctx.font = font(800, b.labelSize);
+    while (ctx.measureText(b.label).width > textW && b.labelSize > 17) {
+      b.labelSize -= 1;
+      ctx.font = font(800, b.labelSize);
+    }
+  });
+
+  const contentH = blocks.reduce((s, b) => s + b.h, 0);
+  const WH = Math.max(560, Math.min(880, 152 + contentH + 34));
+  const WY = Math.round((CARD_H - WH) / 2 + 44);
+
+  /* ---- background ---- */
+  const g = ctx.createLinearGradient(0, 0, CARD_W * 0.35, CARD_H);
+  g.addColorStop(0, t.bg[0]);
+  g.addColorStop(0.55, t.bg[1]);
+  g.addColorStop(1, t.bg[2]);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, CARD_W, CARD_H);
+
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  [[160, 190, 260, t.tabs[0]], [950, 540, 300, t.tabs[2]], [210, 1190, 250, t.tabs[1]]]
+    .forEach(([x, y, r, c]) => {
+      const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
+      rg.addColorStop(0, c);
+      rg.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = rg;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  ctx.restore();
+
+  /* ---- tabs perched on the window's top edge ---- */
+  const tw = 232, th = 100, gap = -10;
+  let tx = WX + 24;
+  data.tabs.forEach((tab, i) => {
+    ctx.save();
+    ctx.translate(tx + tw / 2, WY - th / 2 + 8);
+    ctx.rotate((i - 1) * 0.012);
+    ctx.fillStyle = t.tabs[i];
+    roundRect(ctx, -tw / 2, -th / 2, tw, th + 46, 28);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    roundRect(ctx, -tw / 2 + 18, -th / 2 + 16, tw - 84, 13, 7);
+    ctx.fill();
+    ctx.font = font(400, 38);
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.fillText(tab.mood || MOODS[0], tw / 2 - 20, -th / 2 + 23);
+    ctx.restore();
+    tx += tw + gap;
+  });
+
+  ctx.save();
+  ctx.shadowColor = "rgba(40,20,70,0.18)";
+  ctx.shadowBlur = 44;
+  ctx.shadowOffsetY = 18;
+  ctx.fillStyle = t.surface;
+  roundRect(ctx, WX, WY, WW, WH, WR);
+  ctx.fill();
+  ctx.restore();
+
+  /* ---- header ---- */
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = t.ink;
+  ctx.font = font(800, 44);
+  const head = "3 TABS OPEN";
+  const headW = ctx.measureText(head).width;
+  ctx.fillText(head, WX + PAD, WY + 94);
+  ctx.globalAlpha = 0.45;
+  ctx.font = font(800, 32);
+  ctx.fillText("· " + prettyDate(data.date), WX + PAD + headW + 20, WY + 93);
+  ctx.globalAlpha = 1;
+
+  /* ---- entries ---- */
+  let y = WY + 168;
+  blocks.forEach((b, i) => {
+    ctx.fillStyle = t.tabs[i];
+    ctx.globalAlpha = i === 2 ? 1 : 0.8;
+    ctx.font = font(800, b.labelSize);
+    ctx.fillText(b.label, WX + PAD + GUT, y);
+    ctx.globalAlpha = 1;
+
+    ctx.font = font(400, 44);
+    ctx.fillText(data.tabs[i].mood || MOODS[0], WX + PAD + 6, y + 44);
+
+    ctx.fillStyle = t.ink;
+    ctx.font = font(700, size);
+    b.lines.forEach((ln, k) => {
+      ctx.fillText(ln, WX + PAD + GUT, y + 44 + k * (size * 1.26));
+    });
+
+    y += b.h;
+    if (i < 2) {
+      ctx.fillStyle = t.ink;
+      ctx.globalAlpha = 0.09;
+      roundRect(ctx, WX + PAD + GUT, y - 32, WW - PAD * 2 - GUT, 4, 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  });
+
+  /* ---- photo ---- */
+  if (data.photo && data.photo.img) {
+    const cx = CARD_W - 176, cy = WY + 6, r = 124;
+    ctx.save();
+    ctx.shadowColor = "rgba(40,20,70,0.25)";
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 10;
+    ctx.fillStyle = "#fff";
+    ctx.translate(cx, cy);
+    ctx.rotate(0.07);
+    blobPath(ctx, 0, 0, r + 14);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(0.07);
+    blobPath(ctx, 0, 0, r);
+    ctx.clip();
+    const im = data.photo.img;
+    const scale = Math.max((r * 2) / im.width, (r * 2) / im.height);
+    ctx.drawImage(im, -im.width * scale / 2, -im.height * scale / 2,
+                  im.width * scale, im.height * scale);
+    ctx.restore();
+  }
+
+  /* ---- footer ---- */
+  const fy = Math.min(CARD_H - 88, WY + WH + 96);
+  ctx.fillStyle = t.ink;
+  ctx.font = font(800, 40);
+  ctx.textAlign = "left";
+  ctx.globalAlpha = 0.75;
+  ctx.fillText("open yours →", WX + 12, fy);
+  ctx.textAlign = "right";
+  ctx.globalAlpha = 0.42;
+  ctx.fillText("TABS", CARD_W - WX - 12, fy);
+  ctx.globalAlpha = 1;
+}
+
+function canvasToBlob(canvas) {
+  return new Promise(res => canvas.toBlob(res, "image/png", 0.95));
+}
+
+/* The share sheet is the happy path, but it is blocked in embedded viewers
+   and missing on desktop. The caller always shows the press-and-hold image
+   too, so a false return here is not a failure. */
+async function shareCard(canvas, dateKey) {
+  const blob = await canvasToBlob(canvas);
+  if (!blob) return false;
+  const file = new File([blob], `tabs-${dateKey}.png`, { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return true;
+    } catch (e) {
+      return e && e.name === "AbortError" ? true : false;
+    }
+  }
+  return false;
+}
+
+</script>
+<script>
+/* TABS — screen flow. */
+
+const $ = id => document.getElementById(id);
+const store = loadStore();
+const DATE = todayKey();
+const WILD = wildcardFor(DATE);
+
+const state = {
+  theme: store.theme || THEMES[0].id,
+  tabs: [
+    { text: "", mood: MOODS[0] },
+    { text: "", mood: MOODS[0] },
+    { text: "", mood: MOODS[0] }
+  ],
+  photo: null
+};
+
+/* restore an unfinished draft from the same day */
+if (store.draft && store.draft.date === DATE) {
+  state.tabs = store.draft.tabs.map((t, i) => ({
+    text: t.text || "",
+    mood: t.mood || MOODS[0]
+  }));
+  if (store.draft.theme) state.theme = store.draft.theme;
+}
+
+let step = 0;
+
+/* ---------- theme ---------- */
+function applyTheme(id) {
+  const t = themeById(id);
+  const r = document.documentElement.style;
+  r.setProperty("--ink", t.ink);
+  r.setProperty("--surface", t.surface);
+  r.setProperty("--bg1", t.bg[0]);
+  r.setProperty("--bg2", t.bg[1]);
+  r.setProperty("--bg3", t.bg[2]);
+  t.tabs.forEach((c, i) => r.setProperty("--t" + (i + 1), c));
+  const meta = document.querySelector('meta[name=theme-color]');
+  if (meta) meta.setAttribute("content", t.bg[1]);
+}
+
+/* ---------- screens ---------- */
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
+  $(id).classList.add("on");
+  window.scrollTo(0, 0);
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("on"), 2600);
+}
+
+/* ---------- compose ---------- */
+const SLOT_LABEL = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
+const SLOT_HINT = [
+  () => pickExample(EXAMPLES.thought, DATE),
+  () => pickExample(EXAMPLES.doing, DATE),
+  () => pickExample(EXAMPLES.wild, DATE)
+];
+
+function paintMoods() {
+  const row = $("c-moods");
+  row.innerHTML = "";
+  MOODS.forEach(m => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = m;
+    if (m === state.tabs[step].mood) b.classList.add("on");
+    b.onclick = () => {
+      state.tabs[step].mood = m;
+      paintMoods();
+      saveDraft();
+    };
+    row.appendChild(b);
+  });
+}
+
+function paintStep() {
+  const t = themeById(state.theme);
+  $("c-card").style.setProperty("--tabcolor", t.tabs[step]);
+  $("c-label").textContent = SLOT_LABEL[step];
+  $("c-wild").hidden = step !== 2;
+  $("c-wild").textContent = WILD;
+  $("c-step").textContent = `Tab ${step + 1} of 3`;
+  $("c-field").placeholder = SLOT_HINT[step]();
+  $("c-field").value = state.tabs[step].text;
+  $("c-count").textContent = state.tabs[step].text.length;
+  $("c-next").textContent = step === 2 ? "Make the card" : "Next tab";
+  $("c-next").disabled = !state.tabs[step].text.trim();
+  [...$("c-dots").children].forEach((d, i) => d.classList.toggle("on", i === step));
+  $("c-card").style.animation = "none";
+  void $("c-card").offsetWidth;
+  $("c-card").style.animation = "";
+  paintMoods();
+}
+
+function saveDraft() {
+  store.draft = { date: DATE, theme: state.theme, tabs: state.tabs };
+  store.theme = state.theme;
+  saveStore(store);
+}
+
+$("c-field").addEventListener("input", e => {
+  state.tabs[step].text = e.target.value;
+  $("c-count").textContent = e.target.value.length;
+  $("c-next").disabled = !e.target.value.trim();
+  saveDraft();
+});
+
+$("c-next").onclick = () => {
+  if (!state.tabs[step].text.trim()) return;
+  if (step < 2) {
+    step++;
+    paintStep();
+    $("c-field").focus();
+  } else {
+    show("s-face");
+  }
+};
+
+$("c-back").onclick = () => {
+  if (step === 0) show("s-hello");
+  else { step--; paintStep(); }
+};
+
+/* ---------- hello ---------- */
+$("start").onclick = () => {
+  step = 0;
+  show("s-compose");
+  paintStep();
+  $("c-field").focus();   /* must be synchronous or iOS won't raise the keyboard */
+};
+
+if (store.history.length) {
+  const h = $("seehistory");
+  h.hidden = false;
+  h.onclick = () => {
+    const last = store.history[0];
+    toast(`${prettyDate(last.date)} — ${last.tabs.map(t => t.mood).join(" ")}`);
+  };
+}
+
+/* ---------- face ---------- */
+$("f-pick").onclick = () => $("f-input").click();
+$("f-skip").onclick = () => { state.photo = null; render(); };
+$("f-back").onclick = () => { show("s-compose"); paintStep(); };
+
+$("f-input").addEventListener("change", e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      state.photo = { img: img, src: ev.target.result };
+      $("f-blob").innerHTML = "";
+      const prev = new Image();
+      prev.src = ev.target.result;
+      $("f-blob").appendChild(prev);
+      $("f-pick").textContent = "Use a different one";
+      $("f-skip").textContent = "Looks good →";
+      $("f-skip").classList.remove("ghost");
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ---------- card ---------- */
+function render() {
+  applyTheme(state.theme);
+  const cv = $("cv");
+  drawCard(cv, {
+    tabs: state.tabs, wild: WILD, photo: state.photo,
+    theme: state.theme, date: DATE
+  });
+  $("d-img").src = cv.toDataURL("image/png");
+  show("s-card");
+  paintSwatches();
+  saveDraft();
+}
+
+function paintSwatches() {
+  const box = $("d-swatches");
+  box.innerHTML = "";
+  THEMES.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "swatch" + (t.id === state.theme ? " on" : "");
+    b.type = "button";
+    b.title = t.name;
+    b.setAttribute("aria-label", t.name);
+    b.style.background = `linear-gradient(140deg,${t.bg[0]},${t.tabs[1]})`;
+    b.onclick = () => { state.theme = t.id; render(); };
+    box.appendChild(b);
+  });
+}
+
+$("d-back").onclick = () => show("s-face");
+
+$("d-again").onclick = () => {
+  state.tabs = state.tabs.map(() => ({ text: "", mood: MOODS[0] }));
+  state.photo = null;
+  $("f-blob").textContent = "🫧";
+  $("f-pick").textContent = "Add a photo";
+  $("f-skip").textContent = "Skip it";
+  $("f-skip").classList.add("ghost");
+  step = 0;
+  saveDraft();
+  show("s-hello");
+};
+
+$("d-send").onclick = async () => {
+  pushHistory(store, { date: DATE, theme: state.theme, wild: WILD, tabs: state.tabs });
+  const ok = await shareCard($("cv"), DATE);
+  if (!ok) toast("Press and hold the card → Save or Copy");
+};
+
+/* ---------- boot ---------- */
+applyTheme(state.theme);
+if (document.fonts && document.fonts.load) {
+  document.fonts.load("800 48px Nunito").catch(() => {});
+}
+
+</script>
+</body>
+</html>
