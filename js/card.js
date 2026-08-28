@@ -287,45 +287,37 @@ function drawCard(canvas, data) {
   ctx.textAlign = "left";
 }
 
-function canvasToBlob(canvas) {
-  return new Promise(res => canvas.toBlob(res, "image/png", 0.95));
+/* Neither of these may hang or throw. An unsettled clipboard promise left the
+   Send button doing nothing at all, with no error to show for it. */
+function settleWithin(promise, ms) {
+  return Promise.race([
+    Promise.resolve(promise).then(() => true, () => false),
+    new Promise(resolve => setTimeout(() => resolve(false), ms))
+  ]);
 }
 
-/* The share sheet is the happy path, but it is blocked in embedded viewers
-   and missing on desktop. The caller always shows the press-and-hold image
-   too, so a false return here is not a failure. */
-/* Safari wants the ClipboardItem built inside the user gesture, so the blob
-   is handed over as a promise rather than awaited first. */
-async function copyCard(canvas) {
-  if (!navigator.clipboard || !window.ClipboardItem) return false;
+async function shareLink(url) {
+  if (!navigator.share) return false;
   try {
-    await navigator.clipboard.write([
-      new ClipboardItem({ "image/png": canvasToBlob(canvas) })
-    ]);
+    await navigator.share({
+      title: "TABS",
+      text: "3 tabs open in my head. Send yours back \u2192",
+      url: url
+    });
     return true;
   } catch (e) {
-    try {
-      const blob = await canvasToBlob(canvas);
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      return true;
-    } catch (e2) { return false; }
+    return !!(e && e.name === "AbortError");
   }
 }
 
-async function shareCard(canvas, dateKey) {
-  const blob = await canvasToBlob(canvas);
-  if (!blob) return false;
-  const file = new File([blob], `tabs-${dateKey}.png`, { type: "image/png" });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({
-        files: [file],
-        text: "3 tabs open in my head. Send yours back \u2192 https://" + APP_URL
-      });
-      return true;
-    } catch (e) {
-      return e && e.name === "AbortError" ? true : false;
-    }
-  }
-  return false;
+async function copyLink(url) {
+  if (!navigator.clipboard || !navigator.clipboard.writeText) return false;
+  /* writeText can throw synchronously when there is no user gesture, so the
+     call itself has to happen inside a promise that cannot escape */
+  const attempt = new Promise((resolve, reject) => {
+    try { resolve(navigator.clipboard.writeText(url)); }
+    catch (e) { reject(e); }
+  });
+  try { return await settleWithin(attempt, 1500); }
+  catch (e) { return false; }
 }

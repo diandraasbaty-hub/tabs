@@ -165,6 +165,7 @@ function render() {
   });
   $("d-img").src = cv.toDataURL("image/png");
   $("d-hint").textContent = state.photo ? HINT_PHOTO : HINT_DEFAULT;
+  $("d-share").hidden = true;
   paintSwatches();
   saveDraft();
 }
@@ -207,18 +208,43 @@ function myLink() {
   return cardLink({ tabs: state.tabs, wild: WILD, theme: state.theme, date: DATE });
 }
 
+function revealLink(url) {
+  $("d-url").value = url;
+  $("d-share").hidden = false;
+}
+
 $("d-send").onclick = async () => {
-  remember();
-  const url = myLink();
-  if (await shareLink(url)) return;
+  let url = "";
+  try {
+    remember();
+    url = myLink();
+    /* show it before anything async — if the share sheet or the clipboard
+       misbehaves, the link is already on screen to copy by hand */
+    revealLink(url);
+    $("d-hint").textContent = "Tap Copy, then paste it into Messages.";
+
+    if (await shareLink(url)) return;
+    if (await copyLink(url)) {
+      toast("Link copied. Paste it into Messages.");
+      $("d-hint").textContent = "Copied. Paste it into any text.";
+      return;
+    }
+    toast("Tap Copy below");
+  } catch (e) {
+    if (url) revealLink(url);
+    $("d-hint").textContent = "Copy the link below and paste it into Messages.";
+  }
+};
+
+$("d-copy").onclick = async () => {
+  const url = $("d-url").value || myLink();
   if (await copyLink(url)) {
     toast("Link copied. Paste it into Messages.");
-    $("d-hint").textContent =
-      "Link is on your clipboard — paste it into any text. It opens this card.";
     return;
   }
-  $("d-hint").textContent = url;
-  toast("Copy the address below");
+  $("d-url").focus();
+  $("d-url").select();
+  toast("Press and hold to copy");
 };
 
 /* ---------- did someone send us one? ---------- */
