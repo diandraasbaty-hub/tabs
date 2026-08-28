@@ -249,9 +249,11 @@ function drawCard(canvas, data) {
   ctx.textBaseline = "alphabetic";
   let y = WY + 74;
   blocks.forEach((b, i) => {
-    ctx.fillStyle = t.tabs[i];
-    ctx.font = font(800, 24);
+    ctx.fillStyle = t.ink;
+    ctx.globalAlpha = 0.6;
+    ctx.font = font(800, 27);
     ctx.fillText(b.label, M + PAD + 96, y);
+    ctx.globalAlpha = 1;
 
     ctx.font = font(400, 44);
     ctx.fillText(data.tabs[i].mood || MOODS[0], M + PAD + 6, y + 44);

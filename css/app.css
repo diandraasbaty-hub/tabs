@@ -44,7 +44,8 @@ body::after{width:55vw;height:55vw;background:var(--t3);bottom:-16vw;right:-12vw
 @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98)}}
 
 /* ---------- bar ---------- */
-.bar{display:flex;align-items:center;gap:12px;min-height:48px;margin-bottom:26px}
+/* tab ears rise 32px above their card, so the bar has to clear that */
+.bar{display:flex;align-items:center;gap:12px;min-height:48px;margin-bottom:50px}
 .brand{font-size:26px;font-weight:800;letter-spacing:-.045em}
 .date{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
   opacity:.5}
@@ -55,7 +56,7 @@ body::after{width:55vw;height:55vw;background:var(--t3);bottom:-16vw;right:-12vw
 }
 .back:active{transform:scale(.88)}
 .facebtn{
-  margin-left:auto;width:48px;height:48px;border-radius:50%;flex:none;
+  margin-left:14px;width:48px;height:48px;border-radius:50%;flex:none;
   border:3px solid rgba(255,255,255,.85);background:rgba(255,255,255,.5);
   background-size:cover;background-position:center;
   color:var(--ink);font-size:22px;font-weight:800;line-height:1;cursor:pointer;
@@ -136,13 +137,16 @@ input[type=file]{display:none}
 .btn:disabled{opacity:.3;box-shadow:none;cursor:default}
 .btn.big-cta{font-size:21px;padding:22px 26px}
 .namechip{
-  flex:1;min-width:0;border:0;outline:0;border-radius:999px;
-  padding:9px 16px;background:rgba(255,255,255,.6);
-  font-family:inherit;font-weight:800;font-size:14px;color:var(--ink);
-  letter-spacing:.06em;text-transform:uppercase
+  flex:0 1 auto;width:150px;min-width:0;margin-right:auto;
+  border:0;outline:0;border-radius:999px;
+  padding:10px 16px;background:rgba(255,255,255,.82);
+  box-shadow:0 3px 10px rgba(60,30,90,.1);
+  font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);
+  letter-spacing:.04em;text-transform:uppercase
 }
-.namechip::placeholder{color:var(--ink);opacity:.4;text-transform:none;
-  letter-spacing:normal;font-size:13px}
+.namechip::placeholder{color:var(--ink);opacity:.62;text-transform:none;
+  letter-spacing:normal;font-size:14px}
+.namechip:focus{background:#fff;box-shadow:0 4px 14px rgba(60,30,90,.18)}
 .sharerow{display:flex;gap:8px;align-items:center;margin-top:10px}
 .sharerow input{
   flex:1;min-width:0;border:0;border-radius:999px;padding:15px 18px;

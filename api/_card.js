@@ -65,7 +65,7 @@ export function previewTree(card) {
 
   const total = card.tabs.reduce((n, tab) => n + (tab.text || "").length, 0);
   const size = total <= 100 ? 50 : total <= 160 ? 44 : total <= 220 ? 38 : 30;
-  const labelSize = size <= 38 ? 19 : 22;
+  const labelSize = size <= 38 ? 22 : 25;
 
   const entry = (tab, i) => el("div", {
     display: "flex", flexDirection: "column", marginBottom: i < 2 ? 22 : 0
@@ -75,9 +75,12 @@ export function previewTree(card) {
         display: "flex", width: 13, height: 13, borderRadius: 7,
         backgroundColor: t.tabs[i], marginRight: 11, flexShrink: 0
       }, []),
+      /* the prompt in ink, not the tab color — pale pink on white is the
+         first thing to go unreadable once a thread scales it down. The dot
+         still carries the color. */
       el("div", {
         display: "flex", fontSize: labelSize, fontWeight: 800,
-        color: t.tabs[i], letterSpacing: 1.4, width: 1000
+        color: t.ink, opacity: 0.62, letterSpacing: 0.5, width: 1000
       }, i === 2 && card.wild
         ? "NEW TAB · " + card.wild.toUpperCase()
         : LABELS[i])
