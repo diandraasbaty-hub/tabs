@@ -49,66 +49,64 @@ export function decodeCard(str) {
 
 const el = (type, style, children) => ({ type, props: { style, children } });
 
-/* A link preview is wide, so the card is rebuilt sideways rather than
-   letterboxed. Emoji are left out on purpose — they are the least reliable
-   thing to render off-browser, and colored dots read fine at this size. */
+/* A link preview is shown small in a thread, so the answers get the whole
+   width and the largest type that still fits. Emoji are left out on purpose —
+   they are the least reliable thing to render off-browser, and colored dots
+   read fine at this size. */
 export function previewTree(card) {
   const t = themeById(card.theme);
 
+  const total = card.tabs.reduce((n, tab) => n + (tab.text || "").length, 0);
+  const size = total <= 100 ? 50 : total <= 160 ? 44 : total <= 220 ? 38 : 32;
+  const labelSize = size <= 38 ? 19 : 22;
+
   const entry = (tab, i) => el("div", {
-    display: "flex", flexDirection: "column", marginBottom: i < 2 ? 26 : 0
+    display: "flex", flexDirection: "column", marginBottom: i < 2 ? 22 : 0
   }, [
-    el("div", { display: "flex", alignItems: "center", marginBottom: 6 }, [
+    el("div", { display: "flex", alignItems: "center", marginBottom: 4 }, [
       el("div", {
-        display: "flex", width: 14, height: 14, borderRadius: 7,
-        backgroundColor: t.tabs[i], marginRight: 12
+        display: "flex", width: 13, height: 13, borderRadius: 7,
+        backgroundColor: t.tabs[i], marginRight: 11, flexShrink: 0
       }, []),
       el("div", {
-        display: "flex", fontSize: 18, fontWeight: 800, color: t.tabs[i],
-        letterSpacing: 1.4, width: 530
+        display: "flex", fontSize: labelSize, fontWeight: 800,
+        color: t.tabs[i], letterSpacing: 1.4, width: 1000
       }, i === 2 && card.wild
         ? "NEW TAB · " + card.wild.toUpperCase()
         : LABELS[i])
     ]),
     el("div", {
-      display: "flex", fontSize: 31, fontWeight: 700, color: t.ink,
-      lineHeight: 1.25, paddingLeft: 26, width: 548
+      display: "flex", fontSize: size, fontWeight: 700, color: t.ink,
+      lineHeight: 1.22, paddingLeft: 24, width: 1000
     }, tab.text || "—")
   ]);
 
   return el("div", {
-    display: "flex", width: 1200, height: 630, padding: 54,
-    fontFamily: "Nunito",
+    display: "flex", flexDirection: "column", width: 1200, height: 630,
+    padding: 44, fontFamily: "Nunito",
     backgroundImage: `linear-gradient(130deg, ${t.bg[0]}, ${t.bg[1]} 55%, ${t.bg[2]})`
   }, [
     el("div", {
-      display: "flex", flexDirection: "column", width: 400, flexShrink: 0,
-      justifyContent: "space-between", paddingRight: 34
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      paddingLeft: 8, paddingRight: 8, marginBottom: 16
     }, [
-      el("div", { display: "flex", flexDirection: "column" }, [
-        el("div", {
-          display: "flex", fontSize: 40, fontWeight: 800, color: t.ink,
-          letterSpacing: -1.6, opacity: 0.55
-        }, "TABS"),
-        el("div", {
-          display: "flex", fontSize: 60, fontWeight: 800, color: t.ink,
-          lineHeight: 1.05, letterSpacing: -1.6, marginTop: 16
-        }, "3 tabs open in my head"),
-        el("div", {
-          display: "flex", fontSize: 24, fontWeight: 800, color: t.ink,
-          opacity: 0.45, marginTop: 18, letterSpacing: 2
-        }, prettyDate(card.date))
-      ]),
       el("div", {
-        display: "flex", fontSize: 26, fontWeight: 800, color: t.ink, opacity: 0.7
-      }, "tap to send yours back")
+        display: "flex", fontSize: 36, fontWeight: 800, color: t.ink,
+        letterSpacing: -0.4
+      }, "3 TABS OPEN IN MY HEAD"),
+      el("div", {
+        display: "flex", fontSize: 26, fontWeight: 800, color: t.ink,
+        opacity: 0.45, letterSpacing: 1.6
+      }, prettyDate(card.date))
     ]),
-    /* an explicit width, not flexGrow — long answers pushed the panel off the
-       right edge and clipped instead of wrapping */
     el("div", {
-      display: "flex", flexDirection: "column", width: 658, flexShrink: 0,
+      display: "flex", flexDirection: "column", flexGrow: 1,
       justifyContent: "center",
-      backgroundColor: t.surface, borderRadius: 40, padding: 42
-    }, card.tabs.map(entry))
+      backgroundColor: t.surface, borderRadius: 36, padding: 36
+    }, card.tabs.map(entry)),
+    el("div", {
+      display: "flex", justifyContent: "center", marginTop: 14,
+      fontSize: 26, fontWeight: 800, color: t.ink, opacity: 0.6
+    }, "tap to send yours back")
   ]);
 }

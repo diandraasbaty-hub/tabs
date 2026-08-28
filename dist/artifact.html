@@ -761,11 +761,9 @@ function settleWithin(promise, ms) {
 async function shareLink(url) {
   if (!navigator.share) return false;
   try {
-    await navigator.share({
-      title: "TABS",
-      text: "3 tabs open in my head. Send yours back \u2192",
-      url: url
-    });
+    /* url only — a text field lands as its own message bubble, and the
+       preview card already says to send theirs back */
+    await navigator.share({ url: url });
     return true;
   } catch (e) {
     return !!(e && e.name === "AbortError");
