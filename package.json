@@ -1,0 +1,17 @@
+{
+  "name": "tabs-app",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Three things open in your head. Send them to someone.",
+  "scripts": {
+    "build": "node build.js",
+    "test:og": "node dev/render-og.js"
+  },
+  "dependencies": {
+    "@vercel/og": "^0.6.4"
+  },
+  "devDependencies": {
+    "satori": "^0.10.13",
+    "@resvg/resvg-js": "^2.6.0"
+  }
+}

@@ -3,10 +3,24 @@
    text thread without being cropped. */
 
 const CARD_W = 1080;
-const APP_URL = "diandraasbaty-hub.github.io/tabs";
-/* Links always point at the public page — the artifact build is private, so a
-   link generated there would be a dead end for whoever receives it. */
-const SHARE_BASE = "https://diandraasbaty-hub.github.io/tabs/";
+/* Where a shared link points. Normally this page's own address, so the app
+   follows whatever host it is deployed on. Inside the private artifact (or a
+   local file) that address is a dead end for the recipient, so it falls back
+   to the public one. */
+const CANONICAL = "https://diandraasbaty-hub.github.io/tabs/";
+
+function shareBase() {
+  try {
+    const o = location.origin;
+    if (/^https?:$/.test(location.protocol) && o && o !== "null" &&
+        !/(^|\.)claude\.ai$/.test(location.hostname)) {
+      return o + location.pathname.replace(/[^/]*$/, "");
+    }
+  } catch (e) { /* fall through */ }
+  return CANONICAL;
+}
+
+const APP_URL = shareBase().replace(/^https?:\/\//, "").replace(/\/$/, "");
 
 /* --- the card, packed into a URL ---------------------------------- */
 
@@ -47,7 +61,7 @@ function decodeCard(str) {
 }
 
 function cardLink(data) {
-  return SHARE_BASE + "?c=" + encodeCard(data);
+  return shareBase() + "?c=" + encodeCard(data);
 }
 const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
 const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];

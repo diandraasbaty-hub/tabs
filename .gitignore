@@ -1,0 +1,4 @@
+node_modules/
+.vercel/
+dev/preview.png
+v*.html
