@@ -193,6 +193,16 @@ $("d-again").onclick = () => {
   show("s-write");
 };
 
+$("d-link").onclick = async () => {
+  const url = "https://" + APP_URL;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast("Link copied. Paste it under your card.");
+  } catch (e) {
+    toast(APP_URL);
+  }
+};
+
 function remember() {
   pushHistory(store, { date: DATE, theme: state.theme, wild: WILD, tabs: state.tabs });
 }
@@ -202,7 +212,8 @@ $("d-send").onclick = async () => {
   if (await shareCard($("cv"), DATE)) return;
   if (await copyCard($("cv"))) {
     toast("Copied. Open Messages and paste it.");
-    $("d-hint").textContent = "On your clipboard — paste it into any text.";
+    $("d-hint").textContent =
+      "On your clipboard — paste it into any text, then send the link too.";
     return;
   }
   toast("Press and hold the card → Copy");

@@ -133,6 +133,7 @@ input[type=file]{display:none}
 .btn:active{transform:scale(.95)}
 .btn:disabled{opacity:.3;box-shadow:none;cursor:default}
 .btn.big-cta{font-size:21px;padding:22px 26px}
+.minirow{display:flex;justify-content:center;gap:4px}
 .linkish{
   background:none;border:0;font-family:inherit;font-weight:800;font-size:15px;
   color:var(--ink);opacity:.5;cursor:pointer;padding:12px

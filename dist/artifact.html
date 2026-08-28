@@ -137,6 +137,7 @@ input[type=file]{display:none}
 .btn:active{transform:scale(.95)}
 .btn:disabled{opacity:.3;box-shadow:none;cursor:default}
 .btn.big-cta{font-size:21px;padding:22px 26px}
+.minirow{display:flex;justify-content:center;gap:4px}
 .linkish{
   background:none;border:0;font-family:inherit;font-weight:800;font-size:15px;
   color:var(--ink);opacity:.5;cursor:pointer;padding:12px
@@ -207,9 +208,12 @@ input[type=file]{display:none}
     <div class="swatches" id="d-swatches"></div>
     <div class="dock">
       <button class="btn big-cta" id="d-send">Send tabs</button>
-      <button class="linkish" id="d-again">start over</button>
+      <div class="minirow">
+        <button class="linkish" id="d-link">copy the link</button>
+        <button class="linkish" id="d-again">start over</button>
+      </div>
     </div>
-    <p class="hint" id="d-hint">Or press and hold the card to copy it.</p>
+    <p class="hint" id="d-hint">Send the link too — that’s how they send theirs back.</p>
   </section>
 
 </div>
@@ -426,7 +430,8 @@ function pushHistory(store, entry) {
    Everything a friend sees is drawn here. 1080x1350 so it lands big in a
    text thread without being cropped. */
 
-const CARD_W = 1080, CARD_H = 1350;
+const CARD_W = 1080;
+const APP_URL = "diandraasbaty-hub.github.io/tabs";
 const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
 const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
 
@@ -484,19 +489,20 @@ function wrap(ctx, text, maxWidth, maxLines) {
   return lines;
 }
 
-/* data = { tabs:[{text,mood}], wild, photo, theme, date } */
+/* data = { tabs:[{text,mood}], wild, photo, theme, date }
+   The canvas height is computed from the content — a fixed 1350 left a field
+   of empty gradient under short answers, which is most of them. */
 function drawCard(canvas, data) {
   const t = themeById(data.theme);
   const ctx = canvas.getContext("2d");
-  canvas.width = CARD_W;
-  canvas.height = CARD_H;
-  ctx.clearRect(0, 0, CARD_W, CARD_H);
 
-  const WX = 74, WW = CARD_W - 148, WR = 54, PAD = 62;
+  const M = 74, WW = CARD_W - M * 2, WR = 54, PAD = 62;
   const textW = WW - PAD * 2 - 96;
+  const HEADLINE = "3 TABS OPEN IN MY HEAD";
 
-  /* measure before anything is drawn, so the window can hug its contents
-     instead of leaving a pool of dead space under short answers */
+  /* measure everything before sizing the canvas */
+  canvas.width = CARD_W;
+  canvas.height = 100;
   let size = 48, blocks;
   for (;;) {
     ctx.font = font(700, size);
@@ -507,13 +513,26 @@ function drawCard(canvas, data) {
         : LABELS[i];
       return { lines, label, h: 44 + lines.length * (size * 1.28) + 46 };
     });
-    const total = blocks.reduce((s, b) => s + b.h, 0);
-    if (total <= 780 || size <= 32) break;
+    if (blocks.reduce((s, b) => s + b.h, 0) <= 780 || size <= 32) break;
     size -= 4;
   }
-  const body = blocks.reduce((s, b) => s + b.h, 0);
-  const WH = Math.round(150 + body + 24);
-  const WY = Math.round((CARD_H - WH) / 2 + 26);
+  /* the photo rides beside the headline like an avatar — parked over the
+     window it covered the third answer */
+  const hasPhoto = !!(data.photo && data.photo.img);
+  const PR = 112;
+  ctx.font = font(800, 58);
+  const headLines = wrap(ctx, HEADLINE, hasPhoto ? WW - 268 : WW, 2);
+
+  const TOP = 76;
+  const headH = Math.max(headLines.length * 66 + 78, hasPhoto ? 244 : 0);
+  const TABSTRIP = 76;
+  const WH = Math.round(60 + blocks.reduce((s, b) => s + b.h, 0) + 20);
+  const footH = 150;
+  const CARD_H = Math.round(TOP + headH + 34 + TABSTRIP + WH + footH);
+
+  canvas.width = CARD_W;
+  canvas.height = CARD_H;
+  ctx.clearRect(0, 0, CARD_W, CARD_H);
 
   /* background */
   const g = ctx.createLinearGradient(0, 0, CARD_W * 0.35, CARD_H);
@@ -524,9 +543,9 @@ function drawCard(canvas, data) {
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
   ctx.save();
-  ctx.globalAlpha = 0.55;
-  [[120, 150, 420, t.tabs[0]], [1010, 470, 460, t.tabs[2]],
-   [180, 1240, 380, t.tabs[1]]].forEach(([x, y, r, c]) => {
+  ctx.globalAlpha = 0.5;
+  [[120, 130, 380, t.tabs[0]], [1010, CARD_H * 0.42, 420, t.tabs[2]],
+   [170, CARD_H - 90, 340, t.tabs[1]]].forEach(([x, y, r, c]) => {
     const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
     rg.addColorStop(0, c);
     rg.addColorStop(1, "rgba(255,255,255,0)");
@@ -537,18 +556,30 @@ function drawCard(canvas, data) {
   });
   ctx.restore();
 
+  /* headline — so a friend knows what they are looking at */
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = t.ink;
+  ctx.font = font(800, 58);
+  let hy = TOP + 54;
+  headLines.forEach(ln => { ctx.fillText(ln, M + 6, hy); hy += 66; });
+  ctx.font = font(800, 30);
+  ctx.globalAlpha = 0.5;
+  ctx.fillText(prettyDate(data.date), M + 8, hy + 4);
+  ctx.globalAlpha = 1;
+
+  const WY = TOP + headH + 34 + TABSTRIP;
+
   /* tabs perched on the window's top edge */
   const tw = 286, th = 118, gap = -12;
-  let tx = WX + 26;
+  let tx = M + 26;
   data.tabs.forEach((tab, i) => {
     ctx.save();
-    ctx.translate(tx + tw / 2, WY - 76 + th / 2);
+    ctx.translate(tx + tw / 2, WY - TABSTRIP + th / 2);
     ctx.rotate((i - 1) * 0.012);
     ctx.fillStyle = t.tabs[i];
     roundRect(ctx, -tw / 2, -th / 2, tw, th + 46, 30);
     ctx.fill();
-    /* only the strip above the window is visible, so both the title bar and
-       the mood sit centered in that band — like a favicon on a browser tab */
     const vis = -21;
     ctx.fillStyle = "rgba(255,255,255,0.55)";
     roundRect(ctx, -tw / 2 + 22, vis - 8, tw - 118, 16, 8);
@@ -567,85 +598,76 @@ function drawCard(canvas, data) {
   ctx.shadowBlur = 48;
   ctx.shadowOffsetY = 18;
   ctx.fillStyle = t.surface;
-  roundRect(ctx, WX, WY, WW, WH, WR);
+  roundRect(ctx, M, WY, WW, WH, WR);
   ctx.fill();
   ctx.restore();
 
-  /* header */
+  /* entries */
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = t.ink;
-  ctx.font = font(800, 44);
-  ctx.fillText("3 TABS OPEN", WX + PAD, WY + 92);
-  const hw = ctx.measureText("3 TABS OPEN").width;
-  ctx.font = font(700, 32);
-  ctx.globalAlpha = 0.45;
-  ctx.fillText("· " + prettyDate(data.date), WX + PAD + hw + 22, WY + 90);
-  ctx.globalAlpha = 1;
-
-  /* entries */
-  let y = WY + 164;
+  let y = WY + 74;
   blocks.forEach((b, i) => {
     ctx.fillStyle = t.tabs[i];
     ctx.font = font(800, 24);
-    ctx.fillText(b.label, WX + PAD + 96, y);
+    ctx.fillText(b.label, M + PAD + 96, y);
 
     ctx.font = font(400, 44);
-    ctx.fillText(data.tabs[i].mood || MOODS[0], WX + PAD + 6, y + 44);
+    ctx.fillText(data.tabs[i].mood || MOODS[0], M + PAD + 6, y + 44);
 
     ctx.fillStyle = t.ink;
     ctx.font = font(700, size);
     b.lines.forEach((ln, k) => {
-      ctx.fillText(ln, WX + PAD + 96, y + 46 + k * (size * 1.28));
+      ctx.fillText(ln, M + PAD + 96, y + 46 + k * (size * 1.28));
     });
 
     y += b.h;
     if (i < 2) {
       ctx.fillStyle = t.ink;
       ctx.globalAlpha = 0.08;
-      roundRect(ctx, WX + PAD + 96, y - 34, WW - PAD * 2 - 96, 4, 2);
+      roundRect(ctx, M + PAD + 96, y - 34, WW - PAD * 2 - 96, 4, 2);
       ctx.fill();
       ctx.globalAlpha = 1;
     }
   });
 
   /* photo */
-  if (data.photo && data.photo.img) {
-    const cx = CARD_W - 232, cy = WY + WH - 30, r = 142;
+  if (hasPhoto) {
+    const cx = CARD_W - M - PR, cy = TOP + PR + 4;
     ctx.save();
     ctx.shadowColor = "rgba(40,20,70,0.28)";
-    ctx.shadowBlur = 32;
-    ctx.shadowOffsetY = 12;
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 10;
     ctx.fillStyle = "#fff";
     ctx.translate(cx, cy);
     ctx.rotate(-0.06);
-    blobPath(ctx, 0, 0, r + 14);
+    blobPath(ctx, 0, 0, PR + 12);
     ctx.fill();
     ctx.restore();
 
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(-0.06);
-    blobPath(ctx, 0, 0, r);
+    blobPath(ctx, 0, 0, PR);
     ctx.clip();
     const im = data.photo.img;
-    const scale = Math.max((r * 2) / im.width, (r * 2) / im.height);
-    ctx.drawImage(im, -im.width * scale / 2, -im.height * scale / 2,
-                  im.width * scale, im.height * scale);
+    const sc = Math.max((PR * 2) / im.width, (PR * 2) / im.height);
+    ctx.drawImage(im, -im.width * sc / 2, -im.height * sc / 2,
+                  im.width * sc, im.height * sc);
     ctx.restore();
   }
 
-  /* footer */
-  const fy = Math.min(WY + WH + 96, CARD_H - 70);
+  /* footer — an instruction and an address, not a fake button */
+  const fy = WY + WH + 72;
+  ctx.textAlign = "center";
   ctx.fillStyle = t.ink;
-  ctx.globalAlpha = 0.8;
-  ctx.font = font(800, 40);
-  ctx.textAlign = "left";
-  ctx.fillText("open yours →", WX + 12, fy);
-  ctx.textAlign = "right";
+  ctx.globalAlpha = 0.88;
+  ctx.font = font(800, 46);
+  ctx.fillText("SEND YOUR TABS BACK!", CARD_W / 2, fy);
   ctx.globalAlpha = 0.5;
-  ctx.fillText("TABS", CARD_W - WX - 12, fy);
+  ctx.font = font(800, 30);
+  ctx.fillText(APP_URL, CARD_W / 2, fy + 46);
   ctx.globalAlpha = 1;
+  ctx.textAlign = "left";
 }
 
 function canvasToBlob(canvas) {
@@ -679,7 +701,10 @@ async function shareCard(canvas, dateKey) {
   const file = new File([blob], `tabs-${dateKey}.png`, { type: "image/png" });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file] });
+      await navigator.share({
+        files: [file],
+        text: "3 tabs open in my head. Send yours back \u2192 https://" + APP_URL
+      });
       return true;
     } catch (e) {
       return e && e.name === "AbortError" ? true : false;
@@ -885,6 +910,16 @@ $("d-again").onclick = () => {
   show("s-write");
 };
 
+$("d-link").onclick = async () => {
+  const url = "https://" + APP_URL;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast("Link copied. Paste it under your card.");
+  } catch (e) {
+    toast(APP_URL);
+  }
+};
+
 function remember() {
   pushHistory(store, { date: DATE, theme: state.theme, wild: WILD, tabs: state.tabs });
 }
@@ -894,7 +929,8 @@ $("d-send").onclick = async () => {
   if (await shareCard($("cv"), DATE)) return;
   if (await copyCard($("cv"))) {
     toast("Copied. Open Messages and paste it.");
-    $("d-hint").textContent = "On your clipboard — paste it into any text.";
+    $("d-hint").textContent =
+      "On your clipboard — paste it into any text, then send the link too.";
     return;
   }
   toast("Press and hold the card → Copy");
