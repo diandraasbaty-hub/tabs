@@ -86,8 +86,8 @@ input[type=file]{display:none}
 }
 .cardhead{display:flex;align-items:center;gap:10px;min-height:34px}
 .slotlabel{
-  font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--tabcolor,var(--t1))
+  font-size:19px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink);opacity:.75
 }
 .moodchip{
   margin-left:auto;flex:none;width:36px;height:36px;border-radius:50%;

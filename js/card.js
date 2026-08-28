@@ -67,7 +67,7 @@ function cardLink(data) {
   return shareBase() + "?c=" + encodeCard(data);
 }
 const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
-const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
+const LABELS = ["HEAD", "HANDS", "HEART"];
 
 /* "NAME · 3 TABS OPEN" rather than a possessive — no apostrophe rule to get
    wrong on names that already end in s. */
@@ -150,10 +150,12 @@ function drawCard(canvas, data) {
     ctx.font = font(700, size);
     blocks = data.tabs.map((tab, i) => {
       const lines = wrap(ctx, tab.text || "—", textW, 3);
-      const label = i === 2
-        ? "NEW TAB · " + (data.wild || "").toUpperCase()
-        : LABELS[i];
-      return { lines, label, h: 44 + lines.length * (size * 1.28) + 46 };
+      return {
+        lines,
+        label: LABELS[i],
+        sub: i === 2 ? (data.wild || "").toUpperCase() : "",
+        h: 52 + lines.length * (size * 1.28) + 46
+      };
     });
     if (blocks.reduce((s, b) => s + b.h, 0) <= 780 || size <= 32) break;
     size -= 4;
@@ -249,19 +251,27 @@ function drawCard(canvas, data) {
   ctx.textBaseline = "alphabetic";
   let y = WY + 74;
   blocks.forEach((b, i) => {
+    /* the slot name carries the weight; the day's question trails it in a
+       lighter, smaller face so HEART can stay big */
     ctx.fillStyle = t.ink;
-    ctx.globalAlpha = 0.6;
-    ctx.font = font(800, 27);
+    ctx.globalAlpha = 0.78;
+    ctx.font = font(800, 34);
     ctx.fillText(b.label, M + PAD + 96, y);
+    if (b.sub) {
+      const lw = ctx.measureText(b.label).width;
+      ctx.globalAlpha = 0.45;
+      ctx.font = font(800, 22);
+      ctx.fillText("· " + b.sub, M + PAD + 96 + lw + 14, y);
+    }
     ctx.globalAlpha = 1;
 
     ctx.font = font(400, 44);
-    ctx.fillText(data.tabs[i].mood || MOODS[0], M + PAD + 6, y + 44);
+    ctx.fillText(data.tabs[i].mood || MOODS[0], M + PAD + 6, y + 50);
 
     ctx.fillStyle = t.ink;
     ctx.font = font(700, size);
     b.lines.forEach((ln, k) => {
-      ctx.fillText(ln, M + PAD + 96, y + 46 + k * (size * 1.28));
+      ctx.fillText(ln, M + PAD + 96, y + 52 + k * (size * 1.28));
     });
 
     y += b.h;

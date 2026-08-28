@@ -18,7 +18,7 @@ export const THEMES = [
     tabs: ["#ffd23c", "#ffa53c", "#ff8360"], ink: "#4a3410", surface: "#fffdf3" }
 ];
 
-const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
+const LABELS = ["HEAD", "HANDS", "HEART"];
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
 const cleanName = n => String(n || "").replace(/[<>]/g, "").trim().slice(0, 18);
@@ -65,25 +65,40 @@ export function previewTree(card) {
 
   const total = card.tabs.reduce((n, tab) => n + (tab.text || "").length, 0);
   const size = total <= 100 ? 50 : total <= 160 ? 44 : total <= 220 ? 38 : 30;
-  const labelSize = size <= 38 ? 22 : 25;
+  /* bigger slot names need the spacing to give way when someone writes a lot,
+     or the pill falls off the bottom */
+  const tight = size <= 38;
+  const labelSize = tight ? 26 : 33;
+  const rowGap = tight ? 12 : 22;
+  const panelPad = tight ? 26 : 36;
 
   const entry = (tab, i) => el("div", {
-    display: "flex", flexDirection: "column", marginBottom: i < 2 ? 22 : 0
+    display: "flex", flexDirection: "column", marginBottom: i < 2 ? rowGap : 0
   }, [
     el("div", { display: "flex", alignItems: "center", marginBottom: 4 }, [
       el("div", {
         display: "flex", width: 13, height: 13, borderRadius: 7,
         backgroundColor: t.tabs[i], marginRight: 11, flexShrink: 0
       }, []),
-      /* the prompt in ink, not the tab color — pale pink on white is the
-         first thing to go unreadable once a thread scales it down. The dot
-         still carries the color. */
+      /* in ink, not the tab color — pale pink on white is the first thing
+         to go unreadable once a thread scales it down. The dot keeps the
+         color, and the day's question trails the slot name in a smaller face
+         so the slot name itself stays big. */
       el("div", {
-        display: "flex", fontSize: labelSize, fontWeight: 800,
-        color: t.ink, opacity: 0.62, letterSpacing: 0.5, width: 1000
-      }, i === 2 && card.wild
-        ? "NEW TAB · " + card.wild.toUpperCase()
-        : LABELS[i])
+        display: "flex", alignItems: "baseline", width: 1000
+      }, [
+        el("div", {
+          display: "flex", fontSize: labelSize, fontWeight: 800,
+          color: t.ink, opacity: 0.78, letterSpacing: 0.8
+        }, LABELS[i]),
+        i === 2 && card.wild
+          ? el("div", {
+              display: "flex", fontSize: Math.round(labelSize * 0.68),
+              fontWeight: 800, color: t.ink, opacity: 0.45,
+              letterSpacing: 0.4, marginLeft: 12
+            }, "· " + card.wild.toUpperCase())
+          : el("div", { display: "flex" }, "")
+      ])
     ]),
     el("div", {
       display: "flex", fontSize: size, fontWeight: 700, color: t.ink,
@@ -112,7 +127,7 @@ export function previewTree(card) {
     el("div", {
       display: "flex", flexDirection: "column", flexGrow: 1,
       justifyContent: "center",
-      backgroundColor: t.surface, borderRadius: 36, padding: 36
+      backgroundColor: t.surface, borderRadius: 36, padding: panelPad
     }, card.tabs.map(entry)),
     /* the whole preview is tappable in a thread, so this reads as the button
        it effectively is rather than a caption */
