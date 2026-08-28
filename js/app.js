@@ -1,9 +1,9 @@
-/* TABS — screen flow. */
+/* TABS — two screens. Write, send. */
 
 const $ = id => document.getElementById(id);
 const store = loadStore();
 const DATE = todayKey();
-const WILD = wildcardFor(DATE);
+const WILD = wildcardFor(DATE);  /* LABELS comes from card.js */
 
 const state = {
   theme: store.theme || THEMES[0].id,
@@ -15,20 +15,16 @@ const state = {
   photo: null
 };
 
-/* restore an unfinished draft from the same day */
 if (store.draft && store.draft.date === DATE) {
-  state.tabs = store.draft.tabs.map((t, i) => ({
-    text: t.text || "",
-    mood: t.mood || MOODS[0]
+  state.tabs = store.draft.tabs.map(t => ({
+    text: t.text || "", mood: t.mood || MOODS[0]
   }));
   if (store.draft.theme) state.theme = store.draft.theme;
 }
 
-let step = 0;
-
 /* ---------- theme ---------- */
-function applyTheme(id) {
-  const t = themeById(id);
+function applyTheme() {
+  const t = themeById(state.theme);
   const r = document.documentElement.style;
   r.setProperty("--ink", t.ink);
   r.setProperty("--surface", t.surface);
@@ -40,7 +36,6 @@ function applyTheme(id) {
   if (meta) meta.setAttribute("content", t.bg[1]);
 }
 
-/* ---------- screens ---------- */
 function show(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   $(id).classList.add("on");
@@ -56,102 +51,87 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove("on"), 2600);
 }
 
-/* ---------- compose ---------- */
-const SLOT_LABEL = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
-const SLOT_HINT = [
-  () => pickExample(EXAMPLES.thought, DATE),
-  () => pickExample(EXAMPLES.doing, DATE),
-  () => pickExample(EXAMPLES.wild, DATE)
-];
-
-function paintMoods() {
-  const row = $("c-moods");
-  row.innerHTML = "";
-  MOODS.forEach(m => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = m;
-    if (m === state.tabs[step].mood) b.classList.add("on");
-    b.onclick = () => {
-      state.tabs[step].mood = m;
-      paintMoods();
-      saveDraft();
-    };
-    row.appendChild(b);
-  });
-}
-
-function paintStep() {
-  const t = themeById(state.theme);
-  $("c-card").style.setProperty("--tabcolor", t.tabs[step]);
-  $("c-label").textContent = SLOT_LABEL[step];
-  $("c-wild").hidden = step !== 2;
-  $("c-wild").textContent = WILD;
-  $("c-step").textContent = `Tab ${step + 1} of 3`;
-  $("c-field").placeholder = SLOT_HINT[step]();
-  $("c-field").value = state.tabs[step].text;
-  $("c-count").textContent = state.tabs[step].text.length;
-  $("c-next").textContent = step === 2 ? "Make the card" : "Next tab";
-  $("c-next").disabled = !state.tabs[step].text.trim();
-  [...$("c-dots").children].forEach((d, i) => d.classList.toggle("on", i === step));
-  $("c-card").style.animation = "none";
-  void $("c-card").offsetWidth;
-  $("c-card").style.animation = "";
-  paintMoods();
-}
-
 function saveDraft() {
   store.draft = { date: DATE, theme: state.theme, tabs: state.tabs };
   store.theme = state.theme;
   saveStore(store);
 }
 
-$("c-field").addEventListener("input", e => {
-  state.tabs[step].text = e.target.value;
-  $("c-count").textContent = e.target.value.length;
-  $("c-next").disabled = !e.target.value.trim();
-  saveDraft();
-});
-
-$("c-next").onclick = () => {
-  if (!state.tabs[step].text.trim()) return;
-  if (step < 2) {
-    step++;
-    paintStep();
-    $("c-field").focus();
-  } else {
-    show("s-face");
-  }
-};
-
-$("c-back").onclick = () => {
-  if (step === 0) show("s-hello");
-  else { step--; paintStep(); }
-};
-
-/* ---------- hello ---------- */
-$("start").onclick = () => {
-  step = 0;
-  show("s-compose");
-  paintStep();
-  $("c-field").focus();   /* must be synchronous or iOS won't raise the keyboard */
-};
-
-if (store.history.length) {
-  const h = $("seehistory");
-  h.hidden = false;
-  h.onclick = () => {
-    const last = store.history[0];
-    toast(`${prettyDate(last.date)} — ${last.tabs.map(t => t.mood).join(" ")}`);
-  };
+/* ---------- the three cards, all on one screen ---------- */
+function grow(field) {
+  field.style.height = "auto";
+  field.style.height = field.scrollHeight + "px";
 }
 
-/* ---------- face ---------- */
-$("f-pick").onclick = () => $("f-input").click();
-$("f-skip").onclick = () => { state.photo = null; render(); };
-$("f-back").onclick = () => { show("s-compose"); paintStep(); };
+function buildCards() {
+  const wrap = $("w-cards");
+  wrap.innerHTML = "";
+  state.tabs.forEach((tab, i) => {
+    const card = document.createElement("div");
+    card.className = "tabcard";
+    card.style.setProperty("--tabcolor", themeById(state.theme).tabs[i]);
 
-$("f-input").addEventListener("change", e => {
+    const head = document.createElement("div");
+    head.className = "cardhead";
+
+    const label = document.createElement("span");
+    label.className = "slotlabel";
+    label.textContent = LABELS[i];
+    head.appendChild(label);
+
+    /* one chip, tap to cycle — a six-button row for every line was the
+       bulkiest thing on the old screen */
+    const chip = document.createElement("button");
+    chip.className = "moodchip";
+    chip.type = "button";
+    chip.textContent = tab.mood;
+    chip.setAttribute("aria-label", "Change the mood");
+    chip.onclick = () => {
+      const next = (MOODS.indexOf(tab.mood) + 1) % MOODS.length;
+      tab.mood = MOODS[next];
+      chip.textContent = tab.mood;
+      chip.classList.remove("bump");
+      void chip.offsetWidth;
+      chip.classList.add("bump");
+      saveDraft();
+    };
+    head.appendChild(chip);
+    card.appendChild(head);
+
+    if (i === 2) {
+      const q = document.createElement("div");
+      q.className = "wildq";
+      q.textContent = WILD;
+      card.appendChild(q);
+    }
+
+    const field = document.createElement("textarea");
+    field.className = "field";
+    field.rows = 1;
+    field.maxLength = 90;
+    field.value = tab.text;
+    field.placeholder = pickExample(
+      [EXAMPLES.thought, EXAMPLES.doing, EXAMPLES.wild][i], DATE);
+    field.addEventListener("input", () => {
+      tab.text = field.value;
+      grow(field);
+      refreshSend();
+      saveDraft();
+    });
+    card.appendChild(field);
+    wrap.appendChild(card);
+    grow(field);
+  });
+}
+
+function refreshSend() {
+  $("w-send").disabled = !state.tabs.every(t => t.text.trim());
+}
+
+/* ---------- photo, inline ---------- */
+$("w-face").onclick = () => $("w-file").click();
+
+$("w-file").addEventListener("change", e => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -159,13 +139,10 @@ $("f-input").addEventListener("change", e => {
     const img = new Image();
     img.onload = () => {
       state.photo = { img: img, src: ev.target.result };
-      $("f-blob").innerHTML = "";
-      const prev = new Image();
-      prev.src = ev.target.result;
-      $("f-blob").appendChild(prev);
-      $("f-pick").textContent = "Use a different one";
-      $("f-skip").textContent = "Looks good →";
-      $("f-skip").classList.remove("ghost");
+      const btn = $("w-face");
+      btn.classList.add("has");
+      btn.style.backgroundImage = `url(${ev.target.result})`;
+      $("w-faceicon").textContent = "";
     };
     img.src = ev.target.result;
   };
@@ -174,14 +151,13 @@ $("f-input").addEventListener("change", e => {
 
 /* ---------- card ---------- */
 function render() {
-  applyTheme(state.theme);
+  applyTheme();
   const cv = $("cv");
   drawCard(cv, {
     tabs: state.tabs, wild: WILD, photo: state.photo,
     theme: state.theme, date: DATE
   });
   $("d-img").src = cv.toDataURL("image/png");
-  show("s-card");
   paintSwatches();
   saveDraft();
 }
@@ -193,7 +169,6 @@ function paintSwatches() {
     const b = document.createElement("button");
     b.className = "swatch" + (t.id === state.theme ? " on" : "");
     b.type = "button";
-    b.title = t.name;
     b.setAttribute("aria-label", t.name);
     b.style.background = `linear-gradient(140deg,${t.bg[0]},${t.tabs[1]})`;
     b.onclick = () => { state.theme = t.id; render(); };
@@ -201,18 +176,21 @@ function paintSwatches() {
   });
 }
 
-$("d-back").onclick = () => show("s-face");
+$("w-send").onclick = () => { render(); show("s-card"); };
+$("d-back").onclick = () => { buildCards(); show("s-write"); };
 
 $("d-again").onclick = () => {
   state.tabs = state.tabs.map(() => ({ text: "", mood: MOODS[0] }));
   state.photo = null;
-  $("f-blob").textContent = "🫧";
-  $("f-pick").textContent = "Add a photo";
-  $("f-skip").textContent = "Skip it";
-  $("f-skip").classList.add("ghost");
-  step = 0;
+  const btn = $("w-face");
+  btn.classList.remove("has");
+  btn.style.backgroundImage = "";
+  $("w-faceicon").textContent = "＋";
+  $("d-hint").textContent = "Or press and hold the card to copy it.";
   saveDraft();
-  show("s-hello");
+  buildCards();
+  refreshSend();
+  show("s-write");
 };
 
 function remember() {
@@ -224,26 +202,19 @@ $("d-send").onclick = async () => {
   if (await shareCard($("cv"), DATE)) return;
   if (await copyCard($("cv"))) {
     toast("Copied. Open Messages and paste it.");
-    $("d-hint").textContent = "Card is on your clipboard — paste it into any text.";
+    $("d-hint").textContent = "On your clipboard — paste it into any text.";
     return;
   }
   toast("Press and hold the card → Copy");
   $("d-hint").textContent =
-    "Sharing is blocked here. Press and hold the card above, choose Copy, then paste it into Messages.";
-};
-
-$("d-copy").onclick = async () => {
-  remember();
-  if (await copyCard($("cv"))) {
-    toast("Copied. Open Messages and paste it.");
-    $("d-hint").textContent = "Card is on your clipboard — paste it into any text.";
-  } else {
-    toast("Press and hold the card → Copy");
-  }
+    "Sharing is blocked here. Press and hold the card, choose Copy, then paste it into Messages.";
 };
 
 /* ---------- boot ---------- */
-applyTheme(state.theme);
+applyTheme();
+$("w-date").textContent = prettyDate(DATE);
+buildCards();
+refreshSend();
 if (document.fonts && document.fonts.load) {
   document.fonts.load("800 48px Nunito").catch(() => {});
 }

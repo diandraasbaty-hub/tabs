@@ -25,68 +25,35 @@
 <body>
 <div class="app">
 
-  <!-- 1 ------------------------------------------------------------- -->
-  <section class="screen on" id="s-hello">
-    <div class="stack"><i></i><i></i><i></i></div>
-    <div class="wordmark">TABS</div>
-    <div class="tagline">keep tabs on your people</div>
-    <p class="sub">Three things open in your head.<br>Send them to someone.</p>
-    <div class="actions" style="width:100%">
-      <button class="btn big-cta" id="start">What's open?</button>
-      <button class="linkish" id="seehistory" hidden>your last tabs</button>
+  <!-- write ---------------------------------------------------------- -->
+  <section class="screen on" id="s-write">
+    <header class="bar">
+      <span class="brand">TABS</span>
+      <span class="date" id="w-date"></span>
+      <button class="facebtn" id="w-face" aria-label="Add a photo">
+        <span id="w-faceicon">＋</span>
+      </button>
+    </header>
+    <div class="cards" id="w-cards"></div>
+    <input type="file" id="w-file" accept="image/*">
+    <div class="dock">
+      <button class="btn big-cta" id="w-send" disabled>Send</button>
     </div>
   </section>
 
-  <!-- 2 ------------------------------------------------------------- -->
-  <section class="screen" id="s-compose">
-    <div class="topbar">
-      <button class="back" id="c-back" aria-label="Back">←</button>
-      <span class="eyebrow" id="c-step">Tab 1 of 3</span>
-      <div class="dots" id="c-dots"><b class="on"></b><b></b><b></b></div>
-    </div>
-    <div class="tabcard" id="c-card">
-      <div class="slotlabel" id="c-label">A RANDOM THOUGHT</div>
-      <div class="wildq" id="c-wild" hidden></div>
-      <textarea class="field" id="c-field" maxlength="90" rows="3"
-                autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
-      <div class="count"><span id="c-count">0</span>/90</div>
-      <div class="moodrow" id="c-moods"></div>
-    </div>
-    <div class="actions">
-      <button class="btn" id="c-next">Next tab</button>
-    </div>
-  </section>
-
-  <!-- 3 ------------------------------------------------------------- -->
-  <section class="screen" id="s-face">
-    <div class="topbar">
-      <button class="back" id="f-back" aria-label="Back">←</button>
-      <span class="eyebrow">Almost there</span>
-    </div>
-    <h2 class="big">Add a face?</h2>
-    <p class="sub">Totally optional. It just makes it feel like you.</p>
-    <div class="blobwrap"><div class="blob" id="f-blob">🫧</div></div>
-    <input type="file" id="f-input" accept="image/*">
-    <div class="actions">
-      <button class="btn" id="f-pick">Add a photo</button>
-      <button class="btn ghost" id="f-skip">Skip it</button>
-    </div>
-  </section>
-
-  <!-- 4 ------------------------------------------------------------- -->
+  <!-- card ----------------------------------------------------------- -->
   <section class="screen" id="s-card">
-    <div class="topbar">
+    <header class="bar">
       <button class="back" id="d-back" aria-label="Back">←</button>
-      <span class="eyebrow">Your tabs</span>
-    </div>
+      <span class="date">Tap a color to change it</span>
+    </header>
     <div class="cardshell"><img id="d-img" alt="Your TABS card"></div>
     <div class="swatches" id="d-swatches"></div>
-    <div class="actions">
+    <div class="dock">
       <button class="btn big-cta" id="d-send">Send tabs</button>
-      <button class="btn ghost" id="d-copy">Copy the card</button>
       <button class="linkish" id="d-again">start over</button>
     </div>
-    <p class="hint" id="d-hint">Press and hold the card to save or copy it.</p>
+    <p class="hint" id="d-hint">Or press and hold the card to copy it.</p>
   </section>
 
 </div>

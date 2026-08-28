@@ -46,7 +46,7 @@ body{
 }
 body::before,body::after{
   content:"";position:fixed;border-radius:50%;filter:blur(60px);
-  opacity:.55;pointer-events:none;z-index:0;
+  opacity:.5;pointer-events:none;z-index:0;
 }
 body::before{width:60vw;height:60vw;background:var(--t1);top:-18vw;left:-14vw;
   animation:drift 18s ease-in-out infinite alternate}
@@ -57,166 +57,141 @@ body::after{width:55vw;height:55vw;background:var(--t3);bottom:-16vw;right:-12vw
 .app{
   position:relative;z-index:1;
   min-height:100dvh;max-width:520px;margin:0 auto;
-  padding:var(--pad) var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
+  padding:var(--pad);
   display:flex;flex-direction:column;
 }
-
 .screen{display:none;flex:1;flex-direction:column}
-.screen.on{display:flex;animation:pop .45s var(--spring) both}
-@keyframes pop{from{opacity:0;transform:translateY(22px) scale(.96)}}
+.screen.on{display:flex;animation:pop .4s var(--spring) both}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98)}}
 
-/* ---------- type ---------- */
-h1,h2,p{margin:0}
-.eyebrow{
-  font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
-  opacity:.55
-}
-.big{font-size:clamp(28px,8vw,38px);font-weight:800;line-height:1.08;letter-spacing:-.02em}
-.sub{font-size:16px;font-weight:700;opacity:.62;margin-top:10px;line-height:1.4}
-
-/* ---------- hello ---------- */
-#s-hello{justify-content:center;align-items:center;text-align:center;gap:6px}
-.wordmark{
-  font-size:clamp(56px,18vw,86px);font-weight:800;letter-spacing:-.05em;
-  line-height:1;margin-top:6px
-}
-.tagline{font-size:16px;font-weight:800;opacity:.6;letter-spacing:.01em}
-
-.stack{position:relative;height:150px;width:100%;max-width:340px;margin-bottom:6px}
-.stack i{
-  position:absolute;left:50%;bottom:0;display:block;
-  width:180px;height:120px;border-radius:26px 26px 34px 34px;
-  transform-origin:50% 100%;
-  box-shadow:0 12px 26px rgba(60,30,90,.18);
-  animation:bob 3.4s ease-in-out infinite;
-}
-.stack i:nth-child(1){background:var(--t1);margin-left:-140px;transform:rotate(-9deg)}
-.stack i:nth-child(2){background:var(--t2);margin-left:-90px;height:140px;animation-delay:.25s}
-.stack i:nth-child(3){background:var(--t3);margin-left:-40px;transform:rotate(9deg);animation-delay:.5s}
-.stack i::after{
-  content:"";position:absolute;top:16px;left:18px;right:18px;height:12px;
-  border-radius:6px;background:rgba(255,255,255,.55)
-}
-@keyframes bob{50%{transform:translateY(-12px) rotate(var(--r,0deg))}}
-.stack i:nth-child(1){--r:-9deg}
-.stack i:nth-child(3){--r:9deg}
-
-/* ---------- compose ---------- */
-.topbar{display:flex;align-items:center;gap:12px;min-height:44px;margin-bottom:14px}
+/* ---------- bar ---------- */
+.bar{display:flex;align-items:center;gap:12px;min-height:48px;margin-bottom:26px}
+.brand{font-size:26px;font-weight:800;letter-spacing:-.045em}
+.date{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  opacity:.5}
 .back{
   border:0;background:rgba(255,255,255,.6);color:var(--ink);
-  width:44px;height:44px;border-radius:50%;font-size:20px;font-weight:800;
+  width:42px;height:42px;border-radius:50%;font-size:19px;font-weight:800;
   cursor:pointer;transition:transform .25s var(--spring)
 }
 .back:active{transform:scale(.88)}
-.dots{display:flex;gap:7px;margin-left:auto}
-.dots b{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.65);
-  transition:all .35s var(--spring)}
-.dots b.on{width:26px;border-radius:5px;background:var(--ink);opacity:.75}
+.facebtn{
+  margin-left:auto;width:48px;height:48px;border-radius:50%;flex:none;
+  border:3px solid rgba(255,255,255,.85);background:rgba(255,255,255,.5);
+  background-size:cover;background-position:center;
+  color:var(--ink);font-size:22px;font-weight:800;line-height:1;cursor:pointer;
+  box-shadow:0 6px 16px rgba(60,30,90,.16);
+  transition:transform .3s var(--spring)
+}
+.facebtn:active{transform:scale(.9)}
+.facebtn.has{border-color:#fff;box-shadow:0 8px 20px rgba(60,30,90,.28)}
+input[type=file]{display:none}
 
+/* ---------- the three cards ---------- */
+.cards{display:flex;flex-direction:column;gap:44px}
 .tabcard{
-  background:var(--surface);border-radius:34px;padding:24px 22px 18px;
-  box-shadow:0 18px 40px rgba(60,30,90,.16);
-  position:relative;margin-top:34px;
-  animation:pop .5s var(--spring) both;
+  background:var(--surface);border-radius:30px;padding:16px 20px 18px;
+  box-shadow:0 14px 32px rgba(60,30,90,.15);
+  position:relative;
+  animation:pop .45s var(--spring) both;
 }
 .tabcard::before{
-  content:"";position:absolute;top:-40px;left:26px;width:136px;height:42px;
-  border-radius:22px 22px 0 0;background:var(--tabcolor,var(--t1));
-  box-shadow:0 -6px 16px rgba(60,30,90,.12)
+  content:"";position:absolute;top:-32px;left:24px;width:128px;height:34px;
+  border-radius:18px 18px 0 0;background:var(--tabcolor,var(--t1));
+  box-shadow:0 -5px 14px rgba(60,30,90,.1)
 }
 .tabcard::after{
-  content:"";position:absolute;top:-28px;left:44px;width:100px;height:11px;
+  content:"";position:absolute;top:-22px;left:40px;width:92px;height:10px;
   border-radius:5px;background:rgba(255,255,255,.6)
 }
-.slotlabel{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--tabcolor,var(--t1))}
+.cardhead{display:flex;align-items:center;gap:10px;min-height:34px}
+.slotlabel{
+  font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--tabcolor,var(--t1))
+}
+.moodchip{
+  margin-left:auto;flex:none;width:36px;height:36px;border-radius:50%;
+  border:0;background:rgba(0,0,0,.05);font-size:19px;line-height:1;
+  cursor:pointer;transition:transform .25s var(--spring)
+}
+.moodchip:active{transform:scale(.86)}
+.moodchip.bump{animation:bump .4s var(--spring)}
+@keyframes bump{40%{transform:scale(1.28) rotate(-8deg)}}
+
+/* the prompt is a label, not the content — the answer below is the hero */
 .wildq{
-  font-size:21px;font-weight:800;line-height:1.25;margin-top:6px;
-  letter-spacing:-.01em
+  font-size:15px;font-weight:800;line-height:1.3;margin-top:2px;
+  opacity:.55;letter-spacing:.01em
 }
 .wildq::before{content:"⭐ "}
 
 .field{
-  width:100%;border:0;outline:0;background:transparent;resize:none;
+  display:block;width:100%;border:0;outline:0;background:transparent;resize:none;
+  overflow:hidden;
   font-family:inherit;font-weight:700;color:var(--ink);
-  font-size:24px;line-height:1.32;margin-top:10px;min-height:104px;
+  font-size:21px;line-height:1.35;margin-top:6px;min-height:30px;
 }
-.field::placeholder{color:var(--ink);opacity:.28}
-.count{font-size:12px;font-weight:800;opacity:.35;text-align:right}
+.field::placeholder{color:var(--ink);opacity:.26}
 
-.moodrow{display:flex;gap:8px;margin-top:14px;justify-content:space-between}
-.moodrow button{
-  flex:1;min-width:0;border:0;background:rgba(0,0,0,.05);border-radius:18px;
-  padding:10px 0;font-size:24px;line-height:1;cursor:pointer;
-  transition:transform .3s var(--spring),background .2s
+/* ---------- dock ---------- */
+.dock{
+  position:sticky;bottom:0;margin-top:auto;
+  padding:26px 0 calc(6px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;gap:4px;
 }
-.moodrow button.on{background:var(--tabcolor,var(--t1));transform:scale(1.14)}
-.moodrow button:active{transform:scale(.9)}
-
-/* ---------- buttons ---------- */
-#s-hello .actions{margin-top:32px}
-#s-compose .tabcard{margin-top:30px}
-.actions{margin-top:auto;padding-top:22px;display:flex;flex-direction:column;gap:10px}
+.dock::before{
+  content:"";position:absolute;top:-10px;bottom:-30px;
+  left:50%;transform:translateX(-50%);width:100vw;z-index:-1;
+  background:linear-gradient(to top,var(--bg3) 55%,transparent);
+  opacity:.9;pointer-events:none
+}
 .btn{
   border:0;cursor:pointer;font-family:inherit;font-weight:800;
-  font-size:19px;letter-spacing:.02em;
-  padding:19px 26px;border-radius:999px;
+  font-size:20px;letter-spacing:.02em;
+  padding:20px 26px;border-radius:999px;
   background:var(--ink);color:#fff;
   box-shadow:0 12px 26px rgba(60,30,90,.28);
-  transition:transform .3s var(--spring),box-shadow .3s
+  transition:transform .3s var(--spring),opacity .25s
 }
-.btn:active{transform:scale(.94);box-shadow:0 6px 14px rgba(60,30,90,.24)}
-.btn:disabled{opacity:.35;box-shadow:none}
-.btn.ghost{background:rgba(255,255,255,.65);color:var(--ink);box-shadow:none}
+.btn:active{transform:scale(.95)}
+.btn:disabled{opacity:.3;box-shadow:none;cursor:default}
 .btn.big-cta{font-size:21px;padding:22px 26px}
 .linkish{
   background:none;border:0;font-family:inherit;font-weight:800;font-size:15px;
-  color:var(--ink);opacity:.55;cursor:pointer;padding:10px
+  color:var(--ink);opacity:.5;cursor:pointer;padding:12px
 }
 
-/* ---------- face ---------- */
-#s-face{text-align:center}
-.blobwrap{
-  margin:26px auto 0;width:min(66vw,260px);aspect-ratio:1;position:relative;
-  animation:bob2 4s ease-in-out infinite
-}
-@keyframes bob2{50%{transform:translateY(-10px) rotate(-2deg)}}
-.blob{
-  width:100%;height:100%;overflow:hidden;background:rgba(255,255,255,.55);
-  border-radius:52% 48% 45% 55%/50% 55% 45% 50%;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 18px 40px rgba(60,30,90,.2);font-size:56px
-}
-.blob img{width:100%;height:100%;object-fit:cover;display:block}
-input[type=file]{display:none}
-
-/* ---------- card ---------- */
-#s-card{text-align:center}
+/* ---------- card screen ---------- */
 .cardshell{
-  margin:16px auto 0;width:100%;border-radius:26px;overflow:hidden;
-  box-shadow:0 22px 50px rgba(60,30,90,.28);
-  animation:pop .55s var(--spring) both;background:rgba(255,255,255,.4)
+  width:100%;border-radius:26px;overflow:hidden;
+  box-shadow:0 22px 50px rgba(60,30,90,.26);
+  animation:pop .5s var(--spring) both;background:rgba(255,255,255,.4)
 }
 .cardshell img{
   width:100%;display:block;
   -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto
 }
-.swatches{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.swatches{display:flex;gap:10px;justify-content:center;margin-top:20px}
 .swatch{
-  width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.8);
+  width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,255,255,.85);
   cursor:pointer;padding:0;transition:transform .3s var(--spring)
 }
-.swatch.on{transform:scale(1.22);border-color:var(--ink)}
-.hint{font-size:13px;font-weight:800;opacity:.5;margin-top:14px;line-height:1.45}
+.swatch.on{transform:scale(1.2);border-color:var(--ink)}
+.hint{
+  font-size:13px;font-weight:800;opacity:.45;line-height:1.45;text-align:center;
+  margin:0 0 calc(4px + env(safe-area-inset-bottom))
+}
 
 .toast{
-  position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,160%);
   background:var(--ink);color:#fff;padding:14px 22px;border-radius:999px;
-  font-weight:800;font-size:15px;z-index:9;transition:transform .45s var(--spring);
+  font-weight:800;font-size:15px;z-index:9;opacity:0;pointer-events:none;
+  transition:transform .45s var(--spring),opacity .3s;
   max-width:90vw;text-align:center
 }
-.toast.on{transform:translate(-50%,0)}
+.toast.on{transform:translate(-50%,0);opacity:1}
+
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -227,68 +202,35 @@ input[type=file]{display:none}
 <body>
 <div class="app">
 
-  <!-- 1 ------------------------------------------------------------- -->
-  <section class="screen on" id="s-hello">
-    <div class="stack"><i></i><i></i><i></i></div>
-    <div class="wordmark">TABS</div>
-    <div class="tagline">keep tabs on your people</div>
-    <p class="sub">Three things open in your head.<br>Send them to someone.</p>
-    <div class="actions" style="width:100%">
-      <button class="btn big-cta" id="start">What's open?</button>
-      <button class="linkish" id="seehistory" hidden>your last tabs</button>
+  <!-- write ---------------------------------------------------------- -->
+  <section class="screen on" id="s-write">
+    <header class="bar">
+      <span class="brand">TABS</span>
+      <span class="date" id="w-date"></span>
+      <button class="facebtn" id="w-face" aria-label="Add a photo">
+        <span id="w-faceicon">＋</span>
+      </button>
+    </header>
+    <div class="cards" id="w-cards"></div>
+    <input type="file" id="w-file" accept="image/*">
+    <div class="dock">
+      <button class="btn big-cta" id="w-send" disabled>Send</button>
     </div>
   </section>
 
-  <!-- 2 ------------------------------------------------------------- -->
-  <section class="screen" id="s-compose">
-    <div class="topbar">
-      <button class="back" id="c-back" aria-label="Back">←</button>
-      <span class="eyebrow" id="c-step">Tab 1 of 3</span>
-      <div class="dots" id="c-dots"><b class="on"></b><b></b><b></b></div>
-    </div>
-    <div class="tabcard" id="c-card">
-      <div class="slotlabel" id="c-label">A RANDOM THOUGHT</div>
-      <div class="wildq" id="c-wild" hidden></div>
-      <textarea class="field" id="c-field" maxlength="90" rows="3"
-                autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
-      <div class="count"><span id="c-count">0</span>/90</div>
-      <div class="moodrow" id="c-moods"></div>
-    </div>
-    <div class="actions">
-      <button class="btn" id="c-next">Next tab</button>
-    </div>
-  </section>
-
-  <!-- 3 ------------------------------------------------------------- -->
-  <section class="screen" id="s-face">
-    <div class="topbar">
-      <button class="back" id="f-back" aria-label="Back">←</button>
-      <span class="eyebrow">Almost there</span>
-    </div>
-    <h2 class="big">Add a face?</h2>
-    <p class="sub">Totally optional. It just makes it feel like you.</p>
-    <div class="blobwrap"><div class="blob" id="f-blob">🫧</div></div>
-    <input type="file" id="f-input" accept="image/*">
-    <div class="actions">
-      <button class="btn" id="f-pick">Add a photo</button>
-      <button class="btn ghost" id="f-skip">Skip it</button>
-    </div>
-  </section>
-
-  <!-- 4 ------------------------------------------------------------- -->
+  <!-- card ----------------------------------------------------------- -->
   <section class="screen" id="s-card">
-    <div class="topbar">
+    <header class="bar">
       <button class="back" id="d-back" aria-label="Back">←</button>
-      <span class="eyebrow">Your tabs</span>
-    </div>
+      <span class="date">Tap a color to change it</span>
+    </header>
     <div class="cardshell"><img id="d-img" alt="Your TABS card"></div>
     <div class="swatches" id="d-swatches"></div>
-    <div class="actions">
+    <div class="dock">
       <button class="btn big-cta" id="d-send">Send tabs</button>
-      <button class="btn ghost" id="d-copy">Copy the card</button>
       <button class="linkish" id="d-again">start over</button>
     </div>
-    <p class="hint" id="d-hint">Press and hold the card to save or copy it.</p>
+    <p class="hint" id="d-hint">Or press and hold the card to copy it.</p>
   </section>
 
 </div>
@@ -570,39 +512,31 @@ function drawCard(canvas, data) {
   canvas.width = CARD_W;
   canvas.height = CARD_H;
   ctx.clearRect(0, 0, CARD_W, CARD_H);
-  ctx.textBaseline = "alphabetic";
 
   const WX = 74, WW = CARD_W - 148, WR = 54, PAD = 62;
-  const GUT = 96;                    /* emoji column */
-  const textW = WW - PAD * 2 - GUT;
+  const textW = WW - PAD * 2 - 96;
 
-  /* ---- measure before drawing so the window fits its contents ---- */
+  /* measure before anything is drawn, so the window can hug its contents
+     instead of leaving a pool of dead space under short answers */
   let size = 48, blocks;
   for (;;) {
     ctx.font = font(700, size);
     blocks = data.tabs.map((tab, i) => {
       const lines = wrap(ctx, tab.text || "—", textW, 3);
-      return { lines, h: 42 + lines.length * (size * 1.26) + 46 };
+      const label = i === 2
+        ? "NEW TAB · " + (data.wild || "").toUpperCase()
+        : LABELS[i];
+      return { lines, label, h: 44 + lines.length * (size * 1.28) + 46 };
     });
-    if (blocks.reduce((s, b) => s + b.h, 0) <= 660 || size <= 32) break;
+    const total = blocks.reduce((s, b) => s + b.h, 0);
+    if (total <= 780 || size <= 32) break;
     size -= 4;
   }
-  blocks.forEach((b, i) => {
-    b.label = i === 2 ? "NEW TAB · " + String(data.wild || "").toUpperCase()
-                      : LABELS[i];
-    b.labelSize = 26;
-    ctx.font = font(800, b.labelSize);
-    while (ctx.measureText(b.label).width > textW && b.labelSize > 17) {
-      b.labelSize -= 1;
-      ctx.font = font(800, b.labelSize);
-    }
-  });
+  const body = blocks.reduce((s, b) => s + b.h, 0);
+  const WH = Math.round(150 + body + 24);
+  const WY = Math.round((CARD_H - WH) / 2 + 26);
 
-  const contentH = blocks.reduce((s, b) => s + b.h, 0);
-  const WH = Math.max(560, Math.min(880, 152 + contentH + 34));
-  const WY = Math.round((CARD_H - WH) / 2 + 44);
-
-  /* ---- background ---- */
+  /* background */
   const g = ctx.createLinearGradient(0, 0, CARD_W * 0.35, CARD_H);
   g.addColorStop(0, t.bg[0]);
   g.addColorStop(0.55, t.bg[1]);
@@ -611,70 +545,71 @@ function drawCard(canvas, data) {
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
   ctx.save();
-  ctx.globalAlpha = 0.35;
-  [[160, 190, 260, t.tabs[0]], [950, 540, 300, t.tabs[2]], [210, 1190, 250, t.tabs[1]]]
-    .forEach(([x, y, r, c]) => {
-      const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, c);
-      rg.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = rg;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    });
+  ctx.globalAlpha = 0.55;
+  [[120, 150, 420, t.tabs[0]], [1010, 470, 460, t.tabs[2]],
+   [180, 1240, 380, t.tabs[1]]].forEach(([x, y, r, c]) => {
+    const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
+    rg.addColorStop(0, c);
+    rg.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = rg;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
   ctx.restore();
 
-  /* ---- tabs perched on the window's top edge ---- */
-  const tw = 232, th = 100, gap = -10;
-  let tx = WX + 24;
+  /* tabs perched on the window's top edge */
+  const tw = 286, th = 118, gap = -12;
+  let tx = WX + 26;
   data.tabs.forEach((tab, i) => {
     ctx.save();
-    ctx.translate(tx + tw / 2, WY - th / 2 + 8);
+    ctx.translate(tx + tw / 2, WY - 76 + th / 2);
     ctx.rotate((i - 1) * 0.012);
     ctx.fillStyle = t.tabs[i];
-    roundRect(ctx, -tw / 2, -th / 2, tw, th + 46, 28);
+    roundRect(ctx, -tw / 2, -th / 2, tw, th + 46, 30);
     ctx.fill();
+    /* only the strip above the window is visible, so both the title bar and
+       the mood sit centered in that band — like a favicon on a browser tab */
+    const vis = -21;
     ctx.fillStyle = "rgba(255,255,255,0.55)";
-    roundRect(ctx, -tw / 2 + 18, -th / 2 + 16, tw - 84, 13, 7);
+    roundRect(ctx, -tw / 2 + 22, vis - 8, tw - 118, 16, 8);
     ctx.fill();
-    ctx.font = font(400, 38);
-    ctx.textAlign = "right";
+    ctx.font = font(400, 40);
+    ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(tab.mood || MOODS[0], tw / 2 - 20, -th / 2 + 23);
+    ctx.fillText(tab.mood || MOODS[0], tw / 2 - 48, vis);
     ctx.restore();
     tx += tw + gap;
   });
 
+  /* window */
   ctx.save();
-  ctx.shadowColor = "rgba(40,20,70,0.18)";
-  ctx.shadowBlur = 44;
+  ctx.shadowColor = "rgba(40,20,70,0.2)";
+  ctx.shadowBlur = 48;
   ctx.shadowOffsetY = 18;
   ctx.fillStyle = t.surface;
   roundRect(ctx, WX, WY, WW, WH, WR);
   ctx.fill();
   ctx.restore();
 
-  /* ---- header ---- */
+  /* header */
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = t.ink;
   ctx.font = font(800, 44);
-  const head = "3 TABS OPEN";
-  const headW = ctx.measureText(head).width;
-  ctx.fillText(head, WX + PAD, WY + 94);
+  ctx.fillText("3 TABS OPEN", WX + PAD, WY + 92);
+  const hw = ctx.measureText("3 TABS OPEN").width;
+  ctx.font = font(700, 32);
   ctx.globalAlpha = 0.45;
-  ctx.font = font(800, 32);
-  ctx.fillText("· " + prettyDate(data.date), WX + PAD + headW + 20, WY + 93);
+  ctx.fillText("· " + prettyDate(data.date), WX + PAD + hw + 22, WY + 90);
   ctx.globalAlpha = 1;
 
-  /* ---- entries ---- */
-  let y = WY + 168;
+  /* entries */
+  let y = WY + 164;
   blocks.forEach((b, i) => {
     ctx.fillStyle = t.tabs[i];
-    ctx.globalAlpha = i === 2 ? 1 : 0.8;
-    ctx.font = font(800, b.labelSize);
-    ctx.fillText(b.label, WX + PAD + GUT, y);
-    ctx.globalAlpha = 1;
+    ctx.font = font(800, 24);
+    ctx.fillText(b.label, WX + PAD + 96, y);
 
     ctx.font = font(400, 44);
     ctx.fillText(data.tabs[i].mood || MOODS[0], WX + PAD + 6, y + 44);
@@ -682,36 +617,36 @@ function drawCard(canvas, data) {
     ctx.fillStyle = t.ink;
     ctx.font = font(700, size);
     b.lines.forEach((ln, k) => {
-      ctx.fillText(ln, WX + PAD + GUT, y + 44 + k * (size * 1.26));
+      ctx.fillText(ln, WX + PAD + 96, y + 46 + k * (size * 1.28));
     });
 
     y += b.h;
     if (i < 2) {
       ctx.fillStyle = t.ink;
-      ctx.globalAlpha = 0.09;
-      roundRect(ctx, WX + PAD + GUT, y - 32, WW - PAD * 2 - GUT, 4, 2);
+      ctx.globalAlpha = 0.08;
+      roundRect(ctx, WX + PAD + 96, y - 34, WW - PAD * 2 - 96, 4, 2);
       ctx.fill();
       ctx.globalAlpha = 1;
     }
   });
 
-  /* ---- photo ---- */
+  /* photo */
   if (data.photo && data.photo.img) {
-    const cx = CARD_W - 176, cy = WY + 6, r = 124;
+    const cx = CARD_W - 232, cy = WY + WH - 30, r = 142;
     ctx.save();
-    ctx.shadowColor = "rgba(40,20,70,0.25)";
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "rgba(40,20,70,0.28)";
+    ctx.shadowBlur = 32;
+    ctx.shadowOffsetY = 12;
     ctx.fillStyle = "#fff";
     ctx.translate(cx, cy);
-    ctx.rotate(0.07);
+    ctx.rotate(-0.06);
     blobPath(ctx, 0, 0, r + 14);
     ctx.fill();
     ctx.restore();
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(0.07);
+    ctx.rotate(-0.06);
     blobPath(ctx, 0, 0, r);
     ctx.clip();
     const im = data.photo.img;
@@ -721,15 +656,15 @@ function drawCard(canvas, data) {
     ctx.restore();
   }
 
-  /* ---- footer ---- */
-  const fy = Math.min(CARD_H - 88, WY + WH + 96);
+  /* footer */
+  const fy = Math.min(WY + WH + 96, CARD_H - 70);
   ctx.fillStyle = t.ink;
+  ctx.globalAlpha = 0.8;
   ctx.font = font(800, 40);
   ctx.textAlign = "left";
-  ctx.globalAlpha = 0.75;
   ctx.fillText("open yours →", WX + 12, fy);
   ctx.textAlign = "right";
-  ctx.globalAlpha = 0.42;
+  ctx.globalAlpha = 0.5;
   ctx.fillText("TABS", CARD_W - WX - 12, fy);
   ctx.globalAlpha = 1;
 }
@@ -776,12 +711,12 @@ async function shareCard(canvas, dateKey) {
 
 </script>
 <script>
-/* TABS — screen flow. */
+/* TABS — two screens. Write, send. */
 
 const $ = id => document.getElementById(id);
 const store = loadStore();
 const DATE = todayKey();
-const WILD = wildcardFor(DATE);
+const WILD = wildcardFor(DATE);  /* LABELS comes from card.js */
 
 const state = {
   theme: store.theme || THEMES[0].id,
@@ -793,20 +728,16 @@ const state = {
   photo: null
 };
 
-/* restore an unfinished draft from the same day */
 if (store.draft && store.draft.date === DATE) {
-  state.tabs = store.draft.tabs.map((t, i) => ({
-    text: t.text || "",
-    mood: t.mood || MOODS[0]
+  state.tabs = store.draft.tabs.map(t => ({
+    text: t.text || "", mood: t.mood || MOODS[0]
   }));
   if (store.draft.theme) state.theme = store.draft.theme;
 }
 
-let step = 0;
-
 /* ---------- theme ---------- */
-function applyTheme(id) {
-  const t = themeById(id);
+function applyTheme() {
+  const t = themeById(state.theme);
   const r = document.documentElement.style;
   r.setProperty("--ink", t.ink);
   r.setProperty("--surface", t.surface);
@@ -818,7 +749,6 @@ function applyTheme(id) {
   if (meta) meta.setAttribute("content", t.bg[1]);
 }
 
-/* ---------- screens ---------- */
 function show(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   $(id).classList.add("on");
@@ -834,102 +764,87 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove("on"), 2600);
 }
 
-/* ---------- compose ---------- */
-const SLOT_LABEL = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
-const SLOT_HINT = [
-  () => pickExample(EXAMPLES.thought, DATE),
-  () => pickExample(EXAMPLES.doing, DATE),
-  () => pickExample(EXAMPLES.wild, DATE)
-];
-
-function paintMoods() {
-  const row = $("c-moods");
-  row.innerHTML = "";
-  MOODS.forEach(m => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = m;
-    if (m === state.tabs[step].mood) b.classList.add("on");
-    b.onclick = () => {
-      state.tabs[step].mood = m;
-      paintMoods();
-      saveDraft();
-    };
-    row.appendChild(b);
-  });
-}
-
-function paintStep() {
-  const t = themeById(state.theme);
-  $("c-card").style.setProperty("--tabcolor", t.tabs[step]);
-  $("c-label").textContent = SLOT_LABEL[step];
-  $("c-wild").hidden = step !== 2;
-  $("c-wild").textContent = WILD;
-  $("c-step").textContent = `Tab ${step + 1} of 3`;
-  $("c-field").placeholder = SLOT_HINT[step]();
-  $("c-field").value = state.tabs[step].text;
-  $("c-count").textContent = state.tabs[step].text.length;
-  $("c-next").textContent = step === 2 ? "Make the card" : "Next tab";
-  $("c-next").disabled = !state.tabs[step].text.trim();
-  [...$("c-dots").children].forEach((d, i) => d.classList.toggle("on", i === step));
-  $("c-card").style.animation = "none";
-  void $("c-card").offsetWidth;
-  $("c-card").style.animation = "";
-  paintMoods();
-}
-
 function saveDraft() {
   store.draft = { date: DATE, theme: state.theme, tabs: state.tabs };
   store.theme = state.theme;
   saveStore(store);
 }
 
-$("c-field").addEventListener("input", e => {
-  state.tabs[step].text = e.target.value;
-  $("c-count").textContent = e.target.value.length;
-  $("c-next").disabled = !e.target.value.trim();
-  saveDraft();
-});
-
-$("c-next").onclick = () => {
-  if (!state.tabs[step].text.trim()) return;
-  if (step < 2) {
-    step++;
-    paintStep();
-    $("c-field").focus();
-  } else {
-    show("s-face");
-  }
-};
-
-$("c-back").onclick = () => {
-  if (step === 0) show("s-hello");
-  else { step--; paintStep(); }
-};
-
-/* ---------- hello ---------- */
-$("start").onclick = () => {
-  step = 0;
-  show("s-compose");
-  paintStep();
-  $("c-field").focus();   /* must be synchronous or iOS won't raise the keyboard */
-};
-
-if (store.history.length) {
-  const h = $("seehistory");
-  h.hidden = false;
-  h.onclick = () => {
-    const last = store.history[0];
-    toast(`${prettyDate(last.date)} — ${last.tabs.map(t => t.mood).join(" ")}`);
-  };
+/* ---------- the three cards, all on one screen ---------- */
+function grow(field) {
+  field.style.height = "auto";
+  field.style.height = field.scrollHeight + "px";
 }
 
-/* ---------- face ---------- */
-$("f-pick").onclick = () => $("f-input").click();
-$("f-skip").onclick = () => { state.photo = null; render(); };
-$("f-back").onclick = () => { show("s-compose"); paintStep(); };
+function buildCards() {
+  const wrap = $("w-cards");
+  wrap.innerHTML = "";
+  state.tabs.forEach((tab, i) => {
+    const card = document.createElement("div");
+    card.className = "tabcard";
+    card.style.setProperty("--tabcolor", themeById(state.theme).tabs[i]);
 
-$("f-input").addEventListener("change", e => {
+    const head = document.createElement("div");
+    head.className = "cardhead";
+
+    const label = document.createElement("span");
+    label.className = "slotlabel";
+    label.textContent = LABELS[i];
+    head.appendChild(label);
+
+    /* one chip, tap to cycle — a six-button row for every line was the
+       bulkiest thing on the old screen */
+    const chip = document.createElement("button");
+    chip.className = "moodchip";
+    chip.type = "button";
+    chip.textContent = tab.mood;
+    chip.setAttribute("aria-label", "Change the mood");
+    chip.onclick = () => {
+      const next = (MOODS.indexOf(tab.mood) + 1) % MOODS.length;
+      tab.mood = MOODS[next];
+      chip.textContent = tab.mood;
+      chip.classList.remove("bump");
+      void chip.offsetWidth;
+      chip.classList.add("bump");
+      saveDraft();
+    };
+    head.appendChild(chip);
+    card.appendChild(head);
+
+    if (i === 2) {
+      const q = document.createElement("div");
+      q.className = "wildq";
+      q.textContent = WILD;
+      card.appendChild(q);
+    }
+
+    const field = document.createElement("textarea");
+    field.className = "field";
+    field.rows = 1;
+    field.maxLength = 90;
+    field.value = tab.text;
+    field.placeholder = pickExample(
+      [EXAMPLES.thought, EXAMPLES.doing, EXAMPLES.wild][i], DATE);
+    field.addEventListener("input", () => {
+      tab.text = field.value;
+      grow(field);
+      refreshSend();
+      saveDraft();
+    });
+    card.appendChild(field);
+    wrap.appendChild(card);
+    grow(field);
+  });
+}
+
+function refreshSend() {
+  $("w-send").disabled = !state.tabs.every(t => t.text.trim());
+}
+
+/* ---------- photo, inline ---------- */
+$("w-face").onclick = () => $("w-file").click();
+
+$("w-file").addEventListener("change", e => {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -937,13 +852,10 @@ $("f-input").addEventListener("change", e => {
     const img = new Image();
     img.onload = () => {
       state.photo = { img: img, src: ev.target.result };
-      $("f-blob").innerHTML = "";
-      const prev = new Image();
-      prev.src = ev.target.result;
-      $("f-blob").appendChild(prev);
-      $("f-pick").textContent = "Use a different one";
-      $("f-skip").textContent = "Looks good →";
-      $("f-skip").classList.remove("ghost");
+      const btn = $("w-face");
+      btn.classList.add("has");
+      btn.style.backgroundImage = `url(${ev.target.result})`;
+      $("w-faceicon").textContent = "";
     };
     img.src = ev.target.result;
   };
@@ -952,14 +864,13 @@ $("f-input").addEventListener("change", e => {
 
 /* ---------- card ---------- */
 function render() {
-  applyTheme(state.theme);
+  applyTheme();
   const cv = $("cv");
   drawCard(cv, {
     tabs: state.tabs, wild: WILD, photo: state.photo,
     theme: state.theme, date: DATE
   });
   $("d-img").src = cv.toDataURL("image/png");
-  show("s-card");
   paintSwatches();
   saveDraft();
 }
@@ -971,7 +882,6 @@ function paintSwatches() {
     const b = document.createElement("button");
     b.className = "swatch" + (t.id === state.theme ? " on" : "");
     b.type = "button";
-    b.title = t.name;
     b.setAttribute("aria-label", t.name);
     b.style.background = `linear-gradient(140deg,${t.bg[0]},${t.tabs[1]})`;
     b.onclick = () => { state.theme = t.id; render(); };
@@ -979,18 +889,21 @@ function paintSwatches() {
   });
 }
 
-$("d-back").onclick = () => show("s-face");
+$("w-send").onclick = () => { render(); show("s-card"); };
+$("d-back").onclick = () => { buildCards(); show("s-write"); };
 
 $("d-again").onclick = () => {
   state.tabs = state.tabs.map(() => ({ text: "", mood: MOODS[0] }));
   state.photo = null;
-  $("f-blob").textContent = "🫧";
-  $("f-pick").textContent = "Add a photo";
-  $("f-skip").textContent = "Skip it";
-  $("f-skip").classList.add("ghost");
-  step = 0;
+  const btn = $("w-face");
+  btn.classList.remove("has");
+  btn.style.backgroundImage = "";
+  $("w-faceicon").textContent = "＋";
+  $("d-hint").textContent = "Or press and hold the card to copy it.";
   saveDraft();
-  show("s-hello");
+  buildCards();
+  refreshSend();
+  show("s-write");
 };
 
 function remember() {
@@ -1002,26 +915,19 @@ $("d-send").onclick = async () => {
   if (await shareCard($("cv"), DATE)) return;
   if (await copyCard($("cv"))) {
     toast("Copied. Open Messages and paste it.");
-    $("d-hint").textContent = "Card is on your clipboard — paste it into any text.";
+    $("d-hint").textContent = "On your clipboard — paste it into any text.";
     return;
   }
   toast("Press and hold the card → Copy");
   $("d-hint").textContent =
-    "Sharing is blocked here. Press and hold the card above, choose Copy, then paste it into Messages.";
-};
-
-$("d-copy").onclick = async () => {
-  remember();
-  if (await copyCard($("cv"))) {
-    toast("Copied. Open Messages and paste it.");
-    $("d-hint").textContent = "Card is on your clipboard — paste it into any text.";
-  } else {
-    toast("Press and hold the card → Copy");
-  }
+    "Sharing is blocked here. Press and hold the card, choose Copy, then paste it into Messages.";
 };
 
 /* ---------- boot ---------- */
-applyTheme(state.theme);
+applyTheme();
+$("w-date").textContent = prettyDate(DATE);
+buildCards();
+refreshSend();
 if (document.fonts && document.fonts.load) {
   document.fonts.load("800 48px Nunito").catch(() => {});
 }

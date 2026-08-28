@@ -67,39 +67,31 @@ function drawCard(canvas, data) {
   canvas.width = CARD_W;
   canvas.height = CARD_H;
   ctx.clearRect(0, 0, CARD_W, CARD_H);
-  ctx.textBaseline = "alphabetic";
 
   const WX = 74, WW = CARD_W - 148, WR = 54, PAD = 62;
-  const GUT = 96;                    /* emoji column */
-  const textW = WW - PAD * 2 - GUT;
+  const textW = WW - PAD * 2 - 96;
 
-  /* ---- measure before drawing so the window fits its contents ---- */
+  /* measure before anything is drawn, so the window can hug its contents
+     instead of leaving a pool of dead space under short answers */
   let size = 48, blocks;
   for (;;) {
     ctx.font = font(700, size);
     blocks = data.tabs.map((tab, i) => {
       const lines = wrap(ctx, tab.text || "—", textW, 3);
-      return { lines, h: 42 + lines.length * (size * 1.26) + 46 };
+      const label = i === 2
+        ? "NEW TAB · " + (data.wild || "").toUpperCase()
+        : LABELS[i];
+      return { lines, label, h: 44 + lines.length * (size * 1.28) + 46 };
     });
-    if (blocks.reduce((s, b) => s + b.h, 0) <= 660 || size <= 32) break;
+    const total = blocks.reduce((s, b) => s + b.h, 0);
+    if (total <= 780 || size <= 32) break;
     size -= 4;
   }
-  blocks.forEach((b, i) => {
-    b.label = i === 2 ? "NEW TAB · " + String(data.wild || "").toUpperCase()
-                      : LABELS[i];
-    b.labelSize = 26;
-    ctx.font = font(800, b.labelSize);
-    while (ctx.measureText(b.label).width > textW && b.labelSize > 17) {
-      b.labelSize -= 1;
-      ctx.font = font(800, b.labelSize);
-    }
-  });
+  const body = blocks.reduce((s, b) => s + b.h, 0);
+  const WH = Math.round(150 + body + 24);
+  const WY = Math.round((CARD_H - WH) / 2 + 26);
 
-  const contentH = blocks.reduce((s, b) => s + b.h, 0);
-  const WH = Math.max(560, Math.min(880, 152 + contentH + 34));
-  const WY = Math.round((CARD_H - WH) / 2 + 44);
-
-  /* ---- background ---- */
+  /* background */
   const g = ctx.createLinearGradient(0, 0, CARD_W * 0.35, CARD_H);
   g.addColorStop(0, t.bg[0]);
   g.addColorStop(0.55, t.bg[1]);
@@ -108,70 +100,71 @@ function drawCard(canvas, data) {
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
   ctx.save();
-  ctx.globalAlpha = 0.35;
-  [[160, 190, 260, t.tabs[0]], [950, 540, 300, t.tabs[2]], [210, 1190, 250, t.tabs[1]]]
-    .forEach(([x, y, r, c]) => {
-      const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
-      rg.addColorStop(0, c);
-      rg.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = rg;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    });
+  ctx.globalAlpha = 0.55;
+  [[120, 150, 420, t.tabs[0]], [1010, 470, 460, t.tabs[2]],
+   [180, 1240, 380, t.tabs[1]]].forEach(([x, y, r, c]) => {
+    const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
+    rg.addColorStop(0, c);
+    rg.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = rg;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
   ctx.restore();
 
-  /* ---- tabs perched on the window's top edge ---- */
-  const tw = 232, th = 100, gap = -10;
-  let tx = WX + 24;
+  /* tabs perched on the window's top edge */
+  const tw = 286, th = 118, gap = -12;
+  let tx = WX + 26;
   data.tabs.forEach((tab, i) => {
     ctx.save();
-    ctx.translate(tx + tw / 2, WY - th / 2 + 8);
+    ctx.translate(tx + tw / 2, WY - 76 + th / 2);
     ctx.rotate((i - 1) * 0.012);
     ctx.fillStyle = t.tabs[i];
-    roundRect(ctx, -tw / 2, -th / 2, tw, th + 46, 28);
+    roundRect(ctx, -tw / 2, -th / 2, tw, th + 46, 30);
     ctx.fill();
+    /* only the strip above the window is visible, so both the title bar and
+       the mood sit centered in that band — like a favicon on a browser tab */
+    const vis = -21;
     ctx.fillStyle = "rgba(255,255,255,0.55)";
-    roundRect(ctx, -tw / 2 + 18, -th / 2 + 16, tw - 84, 13, 7);
+    roundRect(ctx, -tw / 2 + 22, vis - 8, tw - 118, 16, 8);
     ctx.fill();
-    ctx.font = font(400, 38);
-    ctx.textAlign = "right";
+    ctx.font = font(400, 40);
+    ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(tab.mood || MOODS[0], tw / 2 - 20, -th / 2 + 23);
+    ctx.fillText(tab.mood || MOODS[0], tw / 2 - 48, vis);
     ctx.restore();
     tx += tw + gap;
   });
 
+  /* window */
   ctx.save();
-  ctx.shadowColor = "rgba(40,20,70,0.18)";
-  ctx.shadowBlur = 44;
+  ctx.shadowColor = "rgba(40,20,70,0.2)";
+  ctx.shadowBlur = 48;
   ctx.shadowOffsetY = 18;
   ctx.fillStyle = t.surface;
   roundRect(ctx, WX, WY, WW, WH, WR);
   ctx.fill();
   ctx.restore();
 
-  /* ---- header ---- */
+  /* header */
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = t.ink;
   ctx.font = font(800, 44);
-  const head = "3 TABS OPEN";
-  const headW = ctx.measureText(head).width;
-  ctx.fillText(head, WX + PAD, WY + 94);
+  ctx.fillText("3 TABS OPEN", WX + PAD, WY + 92);
+  const hw = ctx.measureText("3 TABS OPEN").width;
+  ctx.font = font(700, 32);
   ctx.globalAlpha = 0.45;
-  ctx.font = font(800, 32);
-  ctx.fillText("· " + prettyDate(data.date), WX + PAD + headW + 20, WY + 93);
+  ctx.fillText("· " + prettyDate(data.date), WX + PAD + hw + 22, WY + 90);
   ctx.globalAlpha = 1;
 
-  /* ---- entries ---- */
-  let y = WY + 168;
+  /* entries */
+  let y = WY + 164;
   blocks.forEach((b, i) => {
     ctx.fillStyle = t.tabs[i];
-    ctx.globalAlpha = i === 2 ? 1 : 0.8;
-    ctx.font = font(800, b.labelSize);
-    ctx.fillText(b.label, WX + PAD + GUT, y);
-    ctx.globalAlpha = 1;
+    ctx.font = font(800, 24);
+    ctx.fillText(b.label, WX + PAD + 96, y);
 
     ctx.font = font(400, 44);
     ctx.fillText(data.tabs[i].mood || MOODS[0], WX + PAD + 6, y + 44);
@@ -179,36 +172,36 @@ function drawCard(canvas, data) {
     ctx.fillStyle = t.ink;
     ctx.font = font(700, size);
     b.lines.forEach((ln, k) => {
-      ctx.fillText(ln, WX + PAD + GUT, y + 44 + k * (size * 1.26));
+      ctx.fillText(ln, WX + PAD + 96, y + 46 + k * (size * 1.28));
     });
 
     y += b.h;
     if (i < 2) {
       ctx.fillStyle = t.ink;
-      ctx.globalAlpha = 0.09;
-      roundRect(ctx, WX + PAD + GUT, y - 32, WW - PAD * 2 - GUT, 4, 2);
+      ctx.globalAlpha = 0.08;
+      roundRect(ctx, WX + PAD + 96, y - 34, WW - PAD * 2 - 96, 4, 2);
       ctx.fill();
       ctx.globalAlpha = 1;
     }
   });
 
-  /* ---- photo ---- */
+  /* photo */
   if (data.photo && data.photo.img) {
-    const cx = CARD_W - 176, cy = WY + 6, r = 124;
+    const cx = CARD_W - 232, cy = WY + WH - 30, r = 142;
     ctx.save();
-    ctx.shadowColor = "rgba(40,20,70,0.25)";
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "rgba(40,20,70,0.28)";
+    ctx.shadowBlur = 32;
+    ctx.shadowOffsetY = 12;
     ctx.fillStyle = "#fff";
     ctx.translate(cx, cy);
-    ctx.rotate(0.07);
+    ctx.rotate(-0.06);
     blobPath(ctx, 0, 0, r + 14);
     ctx.fill();
     ctx.restore();
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(0.07);
+    ctx.rotate(-0.06);
     blobPath(ctx, 0, 0, r);
     ctx.clip();
     const im = data.photo.img;
@@ -218,15 +211,15 @@ function drawCard(canvas, data) {
     ctx.restore();
   }
 
-  /* ---- footer ---- */
-  const fy = Math.min(CARD_H - 88, WY + WH + 96);
+  /* footer */
+  const fy = Math.min(WY + WH + 96, CARD_H - 70);
   ctx.fillStyle = t.ink;
+  ctx.globalAlpha = 0.8;
   ctx.font = font(800, 40);
   ctx.textAlign = "left";
-  ctx.globalAlpha = 0.75;
   ctx.fillText("open yours →", WX + 12, fy);
   ctx.textAlign = "right";
-  ctx.globalAlpha = 0.42;
+  ctx.globalAlpha = 0.5;
   ctx.fillText("TABS", CARD_W - WX - 12, fy);
   ctx.globalAlpha = 1;
 }
