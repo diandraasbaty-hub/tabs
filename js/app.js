@@ -150,6 +150,12 @@ $("w-file").addEventListener("change", e => {
 });
 
 /* ---------- card ---------- */
+const HINT_DEFAULT =
+  "One link. They see this card and get a button to send theirs back.";
+const HINT_PHOTO =
+  "Heads up: a link can\u2019t carry your photo. To send the picture instead, " +
+  "press and hold the card above and choose Copy.";
+
 function render() {
   applyTheme();
   const cv = $("cv");
@@ -158,6 +164,7 @@ function render() {
     theme: state.theme, date: DATE
   });
   $("d-img").src = cv.toDataURL("image/png");
+  $("d-hint").textContent = state.photo ? HINT_PHOTO : HINT_DEFAULT;
   paintSwatches();
   saveDraft();
 }
@@ -186,39 +193,52 @@ $("d-again").onclick = () => {
   btn.classList.remove("has");
   btn.style.backgroundImage = "";
   $("w-faceicon").textContent = "＋";
-  $("d-hint").textContent = "Or press and hold the card to copy it.";
   saveDraft();
   buildCards();
   refreshSend();
   show("s-write");
 };
 
-$("d-link").onclick = async () => {
-  const url = "https://" + APP_URL;
-  try {
-    await navigator.clipboard.writeText(url);
-    toast("Link copied. Paste it under your card.");
-  } catch (e) {
-    toast(APP_URL);
-  }
-};
-
 function remember() {
   pushHistory(store, { date: DATE, theme: state.theme, wild: WILD, tabs: state.tabs });
 }
 
+function myLink() {
+  return cardLink({ tabs: state.tabs, wild: WILD, theme: state.theme, date: DATE });
+}
+
 $("d-send").onclick = async () => {
   remember();
-  if (await shareCard($("cv"), DATE)) return;
-  if (await copyCard($("cv"))) {
-    toast("Copied. Open Messages and paste it.");
+  const url = myLink();
+  if (await shareLink(url)) return;
+  if (await copyLink(url)) {
+    toast("Link copied. Paste it into Messages.");
     $("d-hint").textContent =
-      "On your clipboard — paste it into any text, then send the link too.";
+      "Link is on your clipboard — paste it into any text. It opens this card.";
     return;
   }
-  toast("Press and hold the card → Copy");
-  $("d-hint").textContent =
-    "Sharing is blocked here. Press and hold the card, choose Copy, then paste it into Messages.";
+  $("d-hint").textContent = url;
+  toast("Copy the address below");
+};
+
+/* ---------- did someone send us one? ---------- */
+function showReceived(got) {
+  const cv = document.createElement("canvas");
+  const prev = state.theme;
+  state.theme = got.theme;
+  applyTheme();
+  drawCard(cv, got);
+  $("g-img").src = cv.toDataURL("image/png");
+  state.theme = prev;
+  show("s-got");
+}
+
+$("g-reply").onclick = () => {
+  history.replaceState(null, "", location.pathname);
+  applyTheme();
+  show("s-write");
+  const first = document.querySelector(".field");
+  if (first) first.focus();
 };
 
 /* ---------- boot ---------- */
@@ -226,6 +246,19 @@ applyTheme();
 $("w-date").textContent = prettyDate(DATE);
 buildCards();
 refreshSend();
+const incoming = new URLSearchParams(location.search).get("c");
+const got = incoming ? decodeCard(incoming) : null;
+
+function boot() {
+  if (got) showReceived(got);
+}
+
+/* the card is drawn to a canvas, so the webfont has to be in before it runs
+   or the render falls back to a system face */
 if (document.fonts && document.fonts.load) {
-  document.fonts.load("800 48px Nunito").catch(() => {});
+  document.fonts.load("800 48px Nunito")
+    .then(() => document.fonts.load("700 48px Nunito"))
+    .then(boot, boot);
+} else {
+  boot();
 }

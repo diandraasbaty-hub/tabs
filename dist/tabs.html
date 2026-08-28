@@ -219,6 +219,19 @@ input[type=file]{display:none}
     </div>
   </section>
 
+  <!-- someone sent you theirs ---------------------------------------- -->
+  <section class="screen" id="s-got">
+    <header class="bar">
+      <span class="brand">TABS</span>
+      <span class="date">Someone sent you their tabs</span>
+    </header>
+    <div class="cardshell"><img id="g-img" alt="Their TABS card"></div>
+    <div class="dock">
+      <button class="btn big-cta" id="g-reply">Send yours back</button>
+    </div>
+    <p class="hint">Three things open in your head. Takes about a minute.</p>
+  </section>
+
   <!-- card ----------------------------------------------------------- -->
   <section class="screen" id="s-card">
     <header class="bar">
@@ -229,12 +242,9 @@ input[type=file]{display:none}
     <div class="swatches" id="d-swatches"></div>
     <div class="dock">
       <button class="btn big-cta" id="d-send">Send tabs</button>
-      <div class="minirow">
-        <button class="linkish" id="d-link">copy the link</button>
-        <button class="linkish" id="d-again">start over</button>
-      </div>
+      <button class="linkish" id="d-again">start over</button>
     </div>
-    <p class="hint" id="d-hint">Send the link too — that’s how they send theirs back.</p>
+    <p class="hint" id="d-hint">One link. They see this card and get a button to send theirs back.</p>
   </section>
 
 </div>
@@ -453,6 +463,51 @@ function pushHistory(store, entry) {
 
 const CARD_W = 1080;
 const APP_URL = "diandraasbaty-hub.github.io/tabs";
+/* Links always point at the public page — the artifact build is private, so a
+   link generated there would be a dead end for whoever receives it. */
+const SHARE_BASE = "https://diandraasbaty-hub.github.io/tabs/";
+
+/* --- the card, packed into a URL ---------------------------------- */
+
+function encodeCard(data) {
+  const payload = {
+    t: data.tabs.map(t => [t.text, Math.max(0, MOODS.indexOf(t.mood))]),
+    w: data.wild,
+    h: data.theme,
+    d: data.date
+  };
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  let bin = "";
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function decodeCard(str) {
+  try {
+    let b = String(str).replace(/-/g, "+").replace(/_/g, "/");
+    while (b.length % 4) b += "=";
+    const bin = atob(b);
+    const bytes = Uint8Array.from(bin, ch => ch.charCodeAt(0));
+    const p = JSON.parse(new TextDecoder().decode(bytes));
+    if (!p || !Array.isArray(p.t) || p.t.length !== 3) return null;
+    return {
+      tabs: p.t.map(pair => ({
+        text: String(pair[0] || ""),
+        mood: MOODS[pair[1]] || MOODS[0]
+      })),
+      wild: p.w || "",
+      theme: p.h || THEMES[0].id,
+      date: /^\d{4}-\d{2}-\d{2}$/.test(p.d || "") ? p.d : todayKey(),
+      photo: null
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function cardLink(data) {
+  return SHARE_BASE + "?c=" + encodeCard(data);
+}
 const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
 const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
 
@@ -888,6 +943,12 @@ $("w-file").addEventListener("change", e => {
 });
 
 /* ---------- card ---------- */
+const HINT_DEFAULT =
+  "One link. They see this card and get a button to send theirs back.";
+const HINT_PHOTO =
+  "Heads up: a link can\u2019t carry your photo. To send the picture instead, " +
+  "press and hold the card above and choose Copy.";
+
 function render() {
   applyTheme();
   const cv = $("cv");
@@ -896,6 +957,7 @@ function render() {
     theme: state.theme, date: DATE
   });
   $("d-img").src = cv.toDataURL("image/png");
+  $("d-hint").textContent = state.photo ? HINT_PHOTO : HINT_DEFAULT;
   paintSwatches();
   saveDraft();
 }
@@ -924,39 +986,52 @@ $("d-again").onclick = () => {
   btn.classList.remove("has");
   btn.style.backgroundImage = "";
   $("w-faceicon").textContent = "＋";
-  $("d-hint").textContent = "Or press and hold the card to copy it.";
   saveDraft();
   buildCards();
   refreshSend();
   show("s-write");
 };
 
-$("d-link").onclick = async () => {
-  const url = "https://" + APP_URL;
-  try {
-    await navigator.clipboard.writeText(url);
-    toast("Link copied. Paste it under your card.");
-  } catch (e) {
-    toast(APP_URL);
-  }
-};
-
 function remember() {
   pushHistory(store, { date: DATE, theme: state.theme, wild: WILD, tabs: state.tabs });
 }
 
+function myLink() {
+  return cardLink({ tabs: state.tabs, wild: WILD, theme: state.theme, date: DATE });
+}
+
 $("d-send").onclick = async () => {
   remember();
-  if (await shareCard($("cv"), DATE)) return;
-  if (await copyCard($("cv"))) {
-    toast("Copied. Open Messages and paste it.");
+  const url = myLink();
+  if (await shareLink(url)) return;
+  if (await copyLink(url)) {
+    toast("Link copied. Paste it into Messages.");
     $("d-hint").textContent =
-      "On your clipboard — paste it into any text, then send the link too.";
+      "Link is on your clipboard — paste it into any text. It opens this card.";
     return;
   }
-  toast("Press and hold the card → Copy");
-  $("d-hint").textContent =
-    "Sharing is blocked here. Press and hold the card, choose Copy, then paste it into Messages.";
+  $("d-hint").textContent = url;
+  toast("Copy the address below");
+};
+
+/* ---------- did someone send us one? ---------- */
+function showReceived(got) {
+  const cv = document.createElement("canvas");
+  const prev = state.theme;
+  state.theme = got.theme;
+  applyTheme();
+  drawCard(cv, got);
+  $("g-img").src = cv.toDataURL("image/png");
+  state.theme = prev;
+  show("s-got");
+}
+
+$("g-reply").onclick = () => {
+  history.replaceState(null, "", location.pathname);
+  applyTheme();
+  show("s-write");
+  const first = document.querySelector(".field");
+  if (first) first.focus();
 };
 
 /* ---------- boot ---------- */
@@ -964,8 +1039,21 @@ applyTheme();
 $("w-date").textContent = prettyDate(DATE);
 buildCards();
 refreshSend();
+const incoming = new URLSearchParams(location.search).get("c");
+const got = incoming ? decodeCard(incoming) : null;
+
+function boot() {
+  if (got) showReceived(got);
+}
+
+/* the card is drawn to a canvas, so the webfont has to be in before it runs
+   or the render falls back to a system face */
 if (document.fonts && document.fonts.load) {
-  document.fonts.load("800 48px Nunito").catch(() => {});
+  document.fonts.load("800 48px Nunito")
+    .then(() => document.fonts.load("700 48px Nunito"))
+    .then(boot, boot);
+} else {
+  boot();
 }
 
 </script>

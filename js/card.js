@@ -4,6 +4,51 @@
 
 const CARD_W = 1080;
 const APP_URL = "diandraasbaty-hub.github.io/tabs";
+/* Links always point at the public page — the artifact build is private, so a
+   link generated there would be a dead end for whoever receives it. */
+const SHARE_BASE = "https://diandraasbaty-hub.github.io/tabs/";
+
+/* --- the card, packed into a URL ---------------------------------- */
+
+function encodeCard(data) {
+  const payload = {
+    t: data.tabs.map(t => [t.text, Math.max(0, MOODS.indexOf(t.mood))]),
+    w: data.wild,
+    h: data.theme,
+    d: data.date
+  };
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  let bin = "";
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function decodeCard(str) {
+  try {
+    let b = String(str).replace(/-/g, "+").replace(/_/g, "/");
+    while (b.length % 4) b += "=";
+    const bin = atob(b);
+    const bytes = Uint8Array.from(bin, ch => ch.charCodeAt(0));
+    const p = JSON.parse(new TextDecoder().decode(bytes));
+    if (!p || !Array.isArray(p.t) || p.t.length !== 3) return null;
+    return {
+      tabs: p.t.map(pair => ({
+        text: String(pair[0] || ""),
+        mood: MOODS[pair[1]] || MOODS[0]
+      })),
+      wild: p.w || "",
+      theme: p.h || THEMES[0].id,
+      date: /^\d{4}-\d{2}-\d{2}$/.test(p.d || "") ? p.d : todayKey(),
+      photo: null
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function cardLink(data) {
+  return SHARE_BASE + "?c=" + encodeCard(data);
+}
 const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
 const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
 
