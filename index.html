@@ -31,7 +31,8 @@
   <section class="screen on" id="s-write">
     <header class="bar">
       <span class="brand">TABS</span>
-      <span class="date" id="w-date"></span>
+      <input class="namechip" id="w-name" placeholder="your name"
+             maxlength="18" autocomplete="given-name" aria-label="Your name">
       <button class="facebtn" id="w-face" aria-label="Add a photo">
         <span id="w-faceicon">＋</span>
       </button>
@@ -47,7 +48,7 @@
   <section class="screen" id="s-got">
     <header class="bar">
       <span class="brand">TABS</span>
-      <span class="date">Someone sent you their tabs</span>
+      <span class="date" id="g-from">Someone sent you their tabs</span>
     </header>
     <div class="cardshell"><img id="g-img" alt="Their TABS card"></div>
     <div class="dock">

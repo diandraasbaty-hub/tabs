@@ -21,6 +21,12 @@ export const THEMES = [
 const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
+const cleanName = n => String(n || "").replace(/[<>]/g, "").trim().slice(0, 18);
+export const headlineFor = name => {
+  const n = cleanName(name);
+  return n ? n.toUpperCase() + " · 3 TABS OPEN" : "3 TABS OPEN IN MY HEAD";
+};
+
 export const themeById = id => THEMES.find(t => t.id === id) || THEMES[0];
 
 export function prettyDate(key) {
@@ -39,6 +45,7 @@ export function decodeCard(str) {
     return {
       tabs: p.t.map(pair => ({ text: String(pair[0] || "").slice(0, 90) })),
       wild: String(p.w || "").slice(0, 60),
+      name: cleanName(p.n),
       theme: typeof p.h === "string" ? p.h : "bubblegum",
       date: /^\d{4}-\d{2}-\d{2}$/.test(p.d || "") ? p.d : ""
     };
@@ -57,7 +64,7 @@ export function previewTree(card) {
   const t = themeById(card.theme);
 
   const total = card.tabs.reduce((n, tab) => n + (tab.text || "").length, 0);
-  const size = total <= 100 ? 50 : total <= 160 ? 44 : total <= 220 ? 38 : 32;
+  const size = total <= 100 ? 50 : total <= 160 ? 44 : total <= 220 ? 38 : 30;
   const labelSize = size <= 38 ? 19 : 22;
 
   const entry = (tab, i) => el("div", {
@@ -93,7 +100,7 @@ export function previewTree(card) {
       el("div", {
         display: "flex", fontSize: 36, fontWeight: 800, color: t.ink,
         letterSpacing: -0.4
-      }, "3 TABS OPEN IN MY HEAD"),
+      }, headlineFor(card.name)),
       el("div", {
         display: "flex", fontSize: 26, fontWeight: 800, color: t.ink,
         opacity: 0.45, letterSpacing: 1.6
@@ -104,9 +111,17 @@ export function previewTree(card) {
       justifyContent: "center",
       backgroundColor: t.surface, borderRadius: 36, padding: 36
     }, card.tabs.map(entry)),
+    /* the whole preview is tappable in a thread, so this reads as the button
+       it effectively is rather than a caption */
     el("div", {
-      display: "flex", justifyContent: "center", marginTop: 14,
-      fontSize: 26, fontWeight: 800, color: t.ink, opacity: 0.6
-    }, "tap to send yours back")
+      display: "flex", justifyContent: "center", marginTop: 16
+    }, [
+      el("div", {
+        display: "flex", fontSize: 34, fontWeight: 800,
+        color: t.surface, backgroundColor: t.ink,
+        borderRadius: 999, paddingLeft: 34, paddingRight: 34,
+        paddingTop: 11, paddingBottom: 13
+      }, "TAP TO SEND YOURS BACK")
+    ])
   ]);
 }

@@ -69,21 +69,23 @@ const STORE_KEY = "tabs-v1";
 function loadStore() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (!raw) return { draft: null, history: [], theme: null };
+    if (!raw) return { name: "", draft: null, history: [], theme: null };
     const parsed = JSON.parse(raw);
     return {
+      name: typeof parsed.name === "string" ? parsed.name : "",
       draft: parsed.draft || null,
       history: Array.isArray(parsed.history) ? parsed.history : [],
       theme: parsed.theme || null
     };
   } catch (e) {
-    return { draft: null, history: [], theme: null };
+    return { name: "", draft: null, history: [], theme: null };
   }
 }
 
 function saveStore(store) {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({
+      name: store.name || "",
       draft: store.draft,
       history: store.history.slice(0, 7),
       theme: store.theme

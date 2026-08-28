@@ -6,6 +6,7 @@ const DATE = todayKey();
 const WILD = wildcardFor(DATE);  /* LABELS comes from card.js */
 
 const state = {
+  name: store.name || "",
   theme: store.theme || THEMES[0].id,
   tabs: [
     { text: "", mood: MOODS[0] },
@@ -54,6 +55,7 @@ function toast(msg) {
 function saveDraft() {
   store.draft = { date: DATE, theme: state.theme, tabs: state.tabs };
   store.theme = state.theme;
+  store.name = state.name;
   saveStore(store);
 }
 
@@ -128,6 +130,13 @@ function refreshSend() {
   $("w-send").disabled = !state.tabs.every(t => t.text.trim());
 }
 
+/* ---------- who it is from ---------- */
+$("w-name").value = state.name;
+$("w-name").addEventListener("input", e => {
+  state.name = e.target.value;
+  saveDraft();
+});
+
 /* ---------- photo, inline ---------- */
 $("w-face").onclick = () => $("w-file").click();
 
@@ -161,7 +170,7 @@ function render() {
   const cv = $("cv");
   drawCard(cv, {
     tabs: state.tabs, wild: WILD, photo: state.photo,
-    theme: state.theme, date: DATE
+    theme: state.theme, date: DATE, name: state.name
   });
   $("d-img").src = cv.toDataURL("image/png");
   $("d-hint").textContent = state.photo ? HINT_PHOTO : HINT_DEFAULT;
@@ -205,7 +214,10 @@ function remember() {
 }
 
 function myLink() {
-  return cardLink({ tabs: state.tabs, wild: WILD, theme: state.theme, date: DATE });
+  return cardLink({
+    tabs: state.tabs, wild: WILD, theme: state.theme,
+    date: DATE, name: state.name
+  });
 }
 
 function revealLink(url) {
@@ -255,6 +267,9 @@ function showReceived(got) {
   applyTheme();
   drawCard(cv, got);
   $("g-img").src = cv.toDataURL("image/png");
+  $("g-from").textContent = got.name
+    ? "From " + got.name
+    : "Someone sent you their tabs";
   state.theme = prev;
   show("s-got");
 }
@@ -269,7 +284,6 @@ $("g-reply").onclick = () => {
 
 /* ---------- boot ---------- */
 applyTheme();
-$("w-date").textContent = prettyDate(DATE);
 buildCards();
 refreshSend();
 const incoming = new URLSearchParams(location.search).get("c");

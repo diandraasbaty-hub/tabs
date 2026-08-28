@@ -20,7 +20,7 @@ export default function handler(req) {
   let image = origin + "/og.png";
 
   if (card) {
-    title = "3 tabs open in my head";
+    title = card.name ? card.name + " · 3 tabs open" : "3 tabs open in my head";
     desc = card.tabs.map(t => t.text).filter(Boolean).join("  ·  ").slice(0, 190);
     image = origin + "/api/og?c=" + encodeURIComponent(raw);
   }

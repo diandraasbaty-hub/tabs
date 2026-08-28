@@ -31,6 +31,8 @@ function encodeCard(data) {
     h: data.theme,
     d: data.date
   };
+  const nm = cleanName(data.name);
+  if (nm) payload.n = nm;
   const bytes = new TextEncoder().encode(JSON.stringify(payload));
   let bin = "";
   bytes.forEach(b => { bin += String.fromCharCode(b); });
@@ -51,6 +53,7 @@ function decodeCard(str) {
         mood: MOODS[pair[1]] || MOODS[0]
       })),
       wild: p.w || "",
+      name: cleanName(p.n),
       theme: p.h || THEMES[0].id,
       date: /^\d{4}-\d{2}-\d{2}$/.test(p.d || "") ? p.d : todayKey(),
       photo: null
@@ -65,6 +68,14 @@ function cardLink(data) {
 }
 const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
 const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
+
+/* "NAME · 3 TABS OPEN" rather than a possessive — no apostrophe rule to get
+   wrong on names that already end in s. */
+const cleanName = n => String(n || "").replace(/[<>]/g, "").trim().slice(0, 18);
+function headlineFor(name) {
+  const n = cleanName(name);
+  return n ? n.toUpperCase() + " · 3 TABS OPEN" : "3 TABS OPEN IN MY HEAD";
+}
 
 const font = (weight, size) => `${weight} ${size}px ${FONT}`;
 
@@ -129,7 +140,7 @@ function drawCard(canvas, data) {
 
   const M = 74, WW = CARD_W - M * 2, WR = 54, PAD = 62;
   const textW = WW - PAD * 2 - 96;
-  const HEADLINE = "3 TABS OPEN IN MY HEAD";
+  const HEADLINE = headlineFor(data.name);
 
   /* measure everything before sizing the canvas */
   canvas.width = CARD_W;

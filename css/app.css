@@ -9,6 +9,8 @@
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* author display rules beat the hidden attribute otherwise */
+[hidden]{display:none!important}
 html,body{height:100%}
 body{
   margin:0;
@@ -133,6 +135,14 @@ input[type=file]{display:none}
 .btn:active{transform:scale(.95)}
 .btn:disabled{opacity:.3;box-shadow:none;cursor:default}
 .btn.big-cta{font-size:21px;padding:22px 26px}
+.namechip{
+  flex:1;min-width:0;border:0;outline:0;border-radius:999px;
+  padding:9px 16px;background:rgba(255,255,255,.6);
+  font-family:inherit;font-weight:800;font-size:14px;color:var(--ink);
+  letter-spacing:.06em;text-transform:uppercase
+}
+.namechip::placeholder{color:var(--ink);opacity:.4;text-transform:none;
+  letter-spacing:normal;font-size:13px}
 .sharerow{display:flex;gap:8px;align-items:center;margin-top:10px}
 .sharerow input{
   flex:1;min-width:0;border:0;border-radius:999px;padding:15px 18px;

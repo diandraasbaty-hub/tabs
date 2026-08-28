@@ -13,6 +13,8 @@
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* author display rules beat the hidden attribute otherwise */
+[hidden]{display:none!important}
 html,body{height:100%}
 body{
   margin:0;
@@ -137,6 +139,14 @@ input[type=file]{display:none}
 .btn:active{transform:scale(.95)}
 .btn:disabled{opacity:.3;box-shadow:none;cursor:default}
 .btn.big-cta{font-size:21px;padding:22px 26px}
+.namechip{
+  flex:1;min-width:0;border:0;outline:0;border-radius:999px;
+  padding:9px 16px;background:rgba(255,255,255,.6);
+  font-family:inherit;font-weight:800;font-size:14px;color:var(--ink);
+  letter-spacing:.06em;text-transform:uppercase
+}
+.namechip::placeholder{color:var(--ink);opacity:.4;text-transform:none;
+  letter-spacing:normal;font-size:13px}
 .sharerow{display:flex;gap:8px;align-items:center;margin-top:10px}
 .sharerow input{
   flex:1;min-width:0;border:0;border-radius:999px;padding:15px 18px;
@@ -192,7 +202,8 @@ input[type=file]{display:none}
   <section class="screen on" id="s-write">
     <header class="bar">
       <span class="brand">TABS</span>
-      <span class="date" id="w-date"></span>
+      <input class="namechip" id="w-name" placeholder="your name"
+             maxlength="18" autocomplete="given-name" aria-label="Your name">
       <button class="facebtn" id="w-face" aria-label="Add a photo">
         <span id="w-faceicon">＋</span>
       </button>
@@ -208,7 +219,7 @@ input[type=file]{display:none}
   <section class="screen" id="s-got">
     <header class="bar">
       <span class="brand">TABS</span>
-      <span class="date">Someone sent you their tabs</span>
+      <span class="date" id="g-from">Someone sent you their tabs</span>
     </header>
     <div class="cardshell"><img id="g-img" alt="Their TABS card"></div>
     <div class="dock">
@@ -410,21 +421,23 @@ const STORE_KEY = "tabs-v1";
 function loadStore() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (!raw) return { draft: null, history: [], theme: null };
+    if (!raw) return { name: "", draft: null, history: [], theme: null };
     const parsed = JSON.parse(raw);
     return {
+      name: typeof parsed.name === "string" ? parsed.name : "",
       draft: parsed.draft || null,
       history: Array.isArray(parsed.history) ? parsed.history : [],
       theme: parsed.theme || null
     };
   } catch (e) {
-    return { draft: null, history: [], theme: null };
+    return { name: "", draft: null, history: [], theme: null };
   }
 }
 
 function saveStore(store) {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({
+      name: store.name || "",
       draft: store.draft,
       history: store.history.slice(0, 7),
       theme: store.theme
@@ -479,6 +492,8 @@ function encodeCard(data) {
     h: data.theme,
     d: data.date
   };
+  const nm = cleanName(data.name);
+  if (nm) payload.n = nm;
   const bytes = new TextEncoder().encode(JSON.stringify(payload));
   let bin = "";
   bytes.forEach(b => { bin += String.fromCharCode(b); });
@@ -499,6 +514,7 @@ function decodeCard(str) {
         mood: MOODS[pair[1]] || MOODS[0]
       })),
       wild: p.w || "",
+      name: cleanName(p.n),
       theme: p.h || THEMES[0].id,
       date: /^\d{4}-\d{2}-\d{2}$/.test(p.d || "") ? p.d : todayKey(),
       photo: null
@@ -513,6 +529,14 @@ function cardLink(data) {
 }
 const FONT = "'Nunito', ui-rounded, -apple-system, system-ui, sans-serif";
 const LABELS = ["A RANDOM THOUGHT", "WHAT I'M DOING", "NEW TAB"];
+
+/* "NAME · 3 TABS OPEN" rather than a possessive — no apostrophe rule to get
+   wrong on names that already end in s. */
+const cleanName = n => String(n || "").replace(/[<>]/g, "").trim().slice(0, 18);
+function headlineFor(name) {
+  const n = cleanName(name);
+  return n ? n.toUpperCase() + " · 3 TABS OPEN" : "3 TABS OPEN IN MY HEAD";
+}
 
 const font = (weight, size) => `${weight} ${size}px ${FONT}`;
 
@@ -577,7 +601,7 @@ function drawCard(canvas, data) {
 
   const M = 74, WW = CARD_W - M * 2, WR = 54, PAD = 62;
   const textW = WW - PAD * 2 - 96;
-  const HEADLINE = "3 TABS OPEN IN MY HEAD";
+  const HEADLINE = headlineFor(data.name);
 
   /* measure everything before sizing the canvas */
   canvas.width = CARD_W;
@@ -792,6 +816,7 @@ const DATE = todayKey();
 const WILD = wildcardFor(DATE);  /* LABELS comes from card.js */
 
 const state = {
+  name: store.name || "",
   theme: store.theme || THEMES[0].id,
   tabs: [
     { text: "", mood: MOODS[0] },
@@ -840,6 +865,7 @@ function toast(msg) {
 function saveDraft() {
   store.draft = { date: DATE, theme: state.theme, tabs: state.tabs };
   store.theme = state.theme;
+  store.name = state.name;
   saveStore(store);
 }
 
@@ -914,6 +940,13 @@ function refreshSend() {
   $("w-send").disabled = !state.tabs.every(t => t.text.trim());
 }
 
+/* ---------- who it is from ---------- */
+$("w-name").value = state.name;
+$("w-name").addEventListener("input", e => {
+  state.name = e.target.value;
+  saveDraft();
+});
+
 /* ---------- photo, inline ---------- */
 $("w-face").onclick = () => $("w-file").click();
 
@@ -947,7 +980,7 @@ function render() {
   const cv = $("cv");
   drawCard(cv, {
     tabs: state.tabs, wild: WILD, photo: state.photo,
-    theme: state.theme, date: DATE
+    theme: state.theme, date: DATE, name: state.name
   });
   $("d-img").src = cv.toDataURL("image/png");
   $("d-hint").textContent = state.photo ? HINT_PHOTO : HINT_DEFAULT;
@@ -991,7 +1024,10 @@ function remember() {
 }
 
 function myLink() {
-  return cardLink({ tabs: state.tabs, wild: WILD, theme: state.theme, date: DATE });
+  return cardLink({
+    tabs: state.tabs, wild: WILD, theme: state.theme,
+    date: DATE, name: state.name
+  });
 }
 
 function revealLink(url) {
@@ -1041,6 +1077,9 @@ function showReceived(got) {
   applyTheme();
   drawCard(cv, got);
   $("g-img").src = cv.toDataURL("image/png");
+  $("g-from").textContent = got.name
+    ? "From " + got.name
+    : "Someone sent you their tabs";
   state.theme = prev;
   show("s-got");
 }
@@ -1055,7 +1094,6 @@ $("g-reply").onclick = () => {
 
 /* ---------- boot ---------- */
 applyTheme();
-$("w-date").textContent = prettyDate(DATE);
 buildCards();
 refreshSend();
 const incoming = new URLSearchParams(location.search).get("c");

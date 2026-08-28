@@ -89,6 +89,22 @@ function auditScripts(files) {
 
 auditScripts(["js/prompts.js", "js/state.js", "js/card.js", "js/app.js"]);
 
+/* A $("id") with no matching element throws at boot and kills the whole app —
+   silently, since it happens before anything is drawn. */
+function auditElements() {
+  const markup = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const ids = new Set([...markup.matchAll(/id="([^"]+)"/g)].map(m => m[1]));
+  const script = fs.readFileSync(path.join(root, "js/app.js"), "utf8");
+  const used = new Set([...script.matchAll(/\$\("([^"]+)"\)/g)].map(m => m[1]));
+  const missing = [...used].filter(id => !ids.has(id));
+  if (missing.length) {
+    throw new Error("Referenced but missing from index.html: " + missing.join(", "));
+  }
+  console.log(`audit ok — ${used.size} element references all resolve`);
+}
+auditElements();
+
+
 /* GitHub Pages serves from /docs */
 fs.mkdirSync(path.join(root, "docs"), { recursive: true });
 fs.writeFileSync(path.join(root, "docs", "index.html"), html);
