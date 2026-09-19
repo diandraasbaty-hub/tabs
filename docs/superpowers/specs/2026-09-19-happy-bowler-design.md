@@ -1,7 +1,7 @@
-# HAPPY BOWLER — design spec
+# THE HAPPY BOWLER — design spec
 
 **Date:** 2026-09-19
-**Full name:** How to Be a Happy Bowler
+**Name:** The Happy Bowler (wordmark: THE HAPPY BOWLER)
 **Tagline:** how'd it go? answer in three frames.
 
 ## What it is
@@ -9,14 +9,14 @@
 The car ride home from the bowling center has one question in it: "How'd it
 go?" The kid says "fine." The parent hears the score. Nobody is happier.
 
-HAPPY BOWLER replaces that question with three frames. After a practice, a
+THE HAPPY BOWLER replaces that question with three frames. After a practice, a
 league night, or a tournament block, the bowler fills in a STRIKE, a SPLIT and
 a SPARE, rates the night in pins (not pinfall), and it becomes a scorecard-style
 card they text to a parent, a coach, or the team thread. No accounts, no feed,
 no backend. The person receiving it needs nothing installed.
 
-The name is the joke and the promise. "How to Be a Happy Bowler" sounds like a
-300-page book. It is three questions. The three questions are the how-to.
+The name is a title, not a how-to. Anyone can be the happy bowler on a given
+night, and the card is how you claim it. The three frames are the whole method.
 
 This is a TABS sibling: same engine (three slots, a daily shared prompt, a
 rendered card, a link that bounces back). Different audience, different skin,
@@ -97,7 +97,7 @@ about 60 for v1. Starter set:
 
 Two, like TABS after the rebuild.
 
-1. **Write** — wordmark, name chip, optional photo. Three frame cards on one
+1. **Write** — THE HAPPY BOWLER wordmark, name chip, optional photo. Three frame cards on one
    screen (STRIKE, SPLIT, SPARE with today's pickup printed on it). The pin row
    and an optional score field under them. One button: BOWL HAPPY.
 2. **Card** — the rendered card, swatches to change the neon, SEND. Below it
@@ -144,7 +144,7 @@ existing ones have clear funnels, so this is a funnel, not a product.
   be the take-home after any Champion's Path or 12 Frames session, so the room
   keeps doing the work after the workshop ends.
 - EYT: the tour thread after every stop. Same prompt for every athlete that day.
-- Merch, later: "Happy Bowler" and "Pins up" are both shirt-ready. Not v1.
+- Merch, later: "The Happy Bowler" and "Pins up" are both shirt-ready. Not v1.
 
 ## Sharing, the technical constraint
 
