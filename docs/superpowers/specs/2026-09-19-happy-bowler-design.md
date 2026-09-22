@@ -129,6 +129,25 @@ Beyond the Lanes brand rules apply to the wordmark lockup and the link-out, not
 to the card palette. The card should look like it belongs at a bowling center at
 9pm on a Friday, not on a coaching website.
 
+## The face
+
+The Happy Bowler needs a face on the cover, the app icon, the link preview and
+the card. Two candidates, sketched in `2026-09-22-happy-bowler-mascot.svg`:
+
+- **A. The pin.** A white pin with a smile on the head and the two red neck
+  stripes doubling as a collar. Reads as "happy" from across a room and works
+  as a single-color print on a shirt or a journal cover.
+- **B. The ball.** A bowling ball where the three finger holes are the face:
+  two eyes and a laughing mouth. The stronger joke, because every bowler has
+  already noticed their ball is a face. Harder to print small, since the face
+  disappears when the holes shrink.
+
+Recommendation: the pin is the mascot, the ball is the Easter egg. The pin
+goes on the cover, the icon and the card corner. The ball shows up as the
+10/10 state of the pins-up meter and on the "Send yours back" screen.
+
+The face is always smiling. Moods live on the frames, not on the mascot.
+
 ## Where it fits in Beyond the Lanes
 
 Free, and deliberately so. The business rule is no new paid products until the
@@ -176,9 +195,9 @@ Fork of TABS with these changes:
 - `js/prompts.js` — the pickup bank replaces WILDCARDS; bowling-flavored
   placeholder examples; the six moods.
 - `js/card.js` — LABELS become STRIKE / SPLIT / SPARE; the pin row and optional
-  score render on the card; neon THEMES; `bowl happy →`.
+  score render on the card; neon THEMES; the pin in the card corner; `bowl happy →`.
 - `js/state.js` — key `happy-v1`, 30-card history, pins and score in the draft.
 - `js/app.js` — pin row interaction and score field on the write screen.
 - `css/app.css` — cosmic bowling skin.
-- `index.html` — wordmark, meta, link preview.
+- `index.html` — wordmark, the pin mascot, meta, link preview.
 - `api/` — link preview renders the frames and the pins.

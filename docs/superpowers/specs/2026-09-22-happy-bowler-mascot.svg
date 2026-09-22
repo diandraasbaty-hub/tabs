@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d0b2b"/><stop offset="1" stop-color="#1a0f3d"/>
+    </linearGradient>
+    <radialGradient id="ball" cx=".35" cy=".3" r=".8">
+      <stop offset="0" stop-color="#b88bff"/><stop offset="1" stop-color="#4a1f9e"/>
+    </radialGradient>
+    <clipPath id="pinclip">
+      <path id="pin" d="M60 8 C85 8 100 30 96 58 C92 82 82 95 84 120 C88 160 118 190 118 240 C118 285 95 300 60 300 C25 300 2 285 2 240 C2 190 32 160 36 120 C38 95 28 82 24 58 C20 30 35 8 60 8 Z"/>
+    </clipPath>
+    <filter id="glow"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="1200" height="640" fill="url(#bg)"/>
+
+  <!-- option A: the pin -->
+  <g transform="translate(240,130) scale(1.25)">
+    <use href="#pin" fill="#ff4fb0" opacity=".35" filter="url(#glow)" transform="translate(0,4)"/>
+    <use href="#pin" fill="#fffaff"/>
+    <g clip-path="url(#pinclip)">
+      <rect x="0" y="100" width="120" height="11" fill="#ff4fb0"/>
+      <rect x="0" y="118" width="120" height="11" fill="#ff4fb0"/>
+    </g>
+    <circle cx="47" cy="44" r="5.5" fill="#3a1f4d"/>
+    <circle cx="73" cy="44" r="5.5" fill="#3a1f4d"/>
+    <circle cx="49" cy="42" r="1.8" fill="#fff"/>
+    <circle cx="75" cy="42" r="1.8" fill="#fff"/>
+    <path d="M44 58 Q60 78 76 58" fill="none" stroke="#3a1f4d" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="34" cy="58" r="6" fill="#ff8fc7" opacity=".7"/>
+    <circle cx="86" cy="58" r="6" fill="#ff8fc7" opacity=".7"/>
+  </g>
+  <text x="315" y="560" text-anchor="middle" font-family="Nunito, ui-rounded, sans-serif" font-weight="800" font-size="30" fill="#fffaff">A. the pin</text>
+  <text x="315" y="596" text-anchor="middle" font-family="Nunito, ui-rounded, sans-serif" font-weight="700" font-size="20" fill="#fffaff" opacity=".6">stripes become a collar, face on the head</text>
+
+  <!-- option B: the ball -->
+  <g transform="translate(880,300)">
+    <circle r="150" fill="#5fc9f8" opacity=".3" filter="url(#glow)"/>
+    <circle r="150" fill="url(#ball)"/>
+    <ellipse cx="-55" cy="-70" rx="40" ry="22" fill="#fff" opacity=".18" transform="rotate(-30 -55 -70)"/>
+    <!-- the three finger holes are the face -->
+    <circle cx="-42" cy="-30" r="18" fill="#160a33"/>
+    <circle cx="42" cy="-30" r="18" fill="#160a33"/>
+    <circle cx="-38" cy="-34" r="5" fill="#fff"/>
+    <circle cx="46" cy="-34" r="5" fill="#fff"/>
+    <path d="M-55 35 Q0 105 55 35 Z" fill="#160a33"/>
+    <path d="M-30 52 Q0 88 30 52 Q0 70 -30 52 Z" fill="#ff4fb0"/>
+    <circle cx="-88" cy="20" r="14" fill="#ff8fc7" opacity=".55"/>
+    <circle cx="88" cy="20" r="14" fill="#ff8fc7" opacity=".55"/>
+  </g>
+  <text x="880" y="560" text-anchor="middle" font-family="Nunito, ui-rounded, sans-serif" font-weight="800" font-size="30" fill="#fffaff">B. the ball</text>
+  <text x="880" y="596" text-anchor="middle" font-family="Nunito, ui-rounded, sans-serif" font-weight="700" font-size="20" fill="#fffaff" opacity=".6">the finger holes are the face</text>
+
+  <text x="600" y="72" text-anchor="middle" font-family="Nunito, ui-rounded, sans-serif" font-weight="800" font-size="44" fill="#fffaff" letter-spacing="-1">THE HAPPY BOWLER</text>
+</svg>
